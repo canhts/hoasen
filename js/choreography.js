@@ -45,12 +45,57 @@ export function initChoreography({ data, onChapterChange }) {
     }
   }
 
-  // Fallback nếu thư viện GSAP chưa tải được
+  // Fallback nếu thư viện GSAP chưa tải được (vẫn chuyển cảnh mượt bằng CSS & IntersectionObserver)
   if (!window.gsap || !window.ScrollTrigger) {
+    const stageViewport = document.getElementById("stage-viewport");
+    const svgLayerHost = document.getElementById("svg-scene-host");
+    const svgGuideHost = document.getElementById("svg-guide-host");
+    const facadeCurtain = document.getElementById("facade-curtain");
+    const fallbackTargets = [
+      { sel: '[data-chapter="gate"]', id: "gate", cam: data.chapters[0].camera },
+      { sel: '[data-chapter="veranda-kitchen"]', id: "veranda-kitchen", cam: data.chapters[1].camera },
+      { sel: '[data-chapter="nursery"]', id: "nursery", cam: data.chapters[2].camera },
+      { sel: '[data-chapter="preschool-small"]', id: "preschool-small", cam: data.chapters[3].camera },
+      { sel: '[data-chapter="playground"]', id: "playground", cam: data.chapters[4].camera },
+      { sel: '[data-chapter="stairs"]', id: "stairs", cam: data.chapters[5].camera },
+      { sel: "#floor2-stop-nho", id: "floor2", cam: data.chapters[6].subClasses[0].camera },
+      { sel: "#floor2-stop-lon", id: "floor2", cam: data.chapters[6].subClasses[1].camera },
+    ];
+    if (svgLayerHost && svgGuideHost && stageViewport) {
+      [svgLayerHost, svgGuideHost].forEach((el) => {
+        el.style.transition = prefersReducedMotion ? "none" : "transform 0.65s cubic-bezier(0.22, 1, 0.36, 1)";
+      });
+      const applyCam = (camObj, chId) => {
+        const vw = stageViewport.clientWidth || window.innerWidth;
+        const vh = stageViewport.clientHeight || window.innerHeight;
+        const mode = vw >= 1024 ? "desktop" : vw >= 768 ? "tablet" : "mobile";
+        const minH = mode === "desktop" ? 760 : mode === "tablet" ? 700 : 670;
+        const t = computeCameraTransform(camObj[mode], vw, vh, minH);
+        const tf = `translate3d(${t.x}px, ${t.y}px, 0) scale(${t.scale})`;
+        svgLayerHost.style.transform = tf;
+        svgGuideHost.style.transform = tf;
+        if (facadeCurtain) facadeCurtain.style.opacity = chId === "gate" ? "1" : "0";
+        onChapterChange(chId);
+      };
+      applyCam(fallbackTargets[0].cam, "gate");
+      const io = new IntersectionObserver(
+        (entries) => {
+          const hit = entries.find((e) => e.isIntersecting);
+          if (!hit) return;
+          const match = fallbackTargets.find((f) => document.querySelector(f.sel) === hit.target);
+          if (match) applyCam(match.cam, match.id);
+        },
+        { threshold: 0.45 }
+      );
+      fallbackTargets.forEach((f) => {
+        const el = document.querySelector(f.sel);
+        if (el) io.observe(el);
+      });
+    }
     return {
       scrollToTarget: (selector) => {
         const el = document.querySelector(selector);
-        if (el) el.scrollIntoView({ behavior: "smooth" });
+        if (el) el.scrollIntoView({ behavior: prefersReducedMotion ? "auto" : "smooth" });
       },
     };
   }
