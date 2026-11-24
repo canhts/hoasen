@@ -1,1 +1,136 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trang cá nhân</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: #f4f6f9;
+      color: #1e293b;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .card {
+      background: #ffffff;
+      max-width: 440px;
+      width: 100%;
+      padding: 40px 32px;
+      border-radius: 24px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+      text-align: center;
+    }
+
+    .avatar {
+      width: 92px;
+      height: 92px;
+      border-radius: 50%;
+      background: #e2e8f0;
+      color: #334155;
+      font-size: 32px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      object-fit: cover;
+    }
+
+    h1 {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: #0f172a;
+    }
+
+    .subtitle {
+      font-size: 15px;
+      color: #64748b;
+      margin-bottom: 20px;
+    }
+
+    .bio {
+      font-size: 15px;
+      line-height: 1.6;
+      color: #475569;
+      margin-bottom: 28px;
+    }
+
+    .links {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .btn {
+      display: block;
+      text-decoration: none;
+      padding: 13px 20px;
+      border-radius: 999px;
+      font-size: 15px;
+      font-weight: 600;
+      transition: transform 0.15s ease, background-color 0.15s ease;
+    }
+
+    .btn-primary {
+      background-color: #0f172a;
+      color: #ffffff;
+    }
+
+    .btn-primary:hover {
+      background-color: #334155;
+      transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+      background-color: #f1f5f9;
+      color: #1e293b;
+    }
+
+    .btn-secondary:hover {
+      background-color: #e2e8f0;
+      transform: translateY(-2px);
+    }
+
+    footer {
+      margin-top: 28px;
+      font-size: 13px;
+      color: #94a3b8;
+    }
+  </style>
+</head>
+<body>
+
+  <main class="card">
+    <!-- Thay chữ cái đại diện hoặc đổi thành thẻ <img src="anh.jpg" class="avatar"> -->
+    <div class="avatar">VC</div>
+
+    <h1>Xin chào, mình là Cảnh</h1>
+    <p class="subtitle">Lập trình & Công nghệ</p>
+
+    <p class="bio">
+      Chào mừng bạn ghé thăm trang web cá nhân của mình. Đây là nơi chia sẻ thông tin liên hệ, sở thích và các dự án nhỏ mình đang thực hiện.
+    </p>
+
+    <div class="links">
+      <a href="tel:0900000000" class="btn btn-primary">Gọi điện / Zalo</a>
+      <a href="https://facebook.com" target="_blank" class="btn btn-secondary">Facebook cá nhân</a>
+      <a href="mailto:email@example.com" class="btn btn-secondary">Gửi Email</a>
+    </div>
+
+    <footer>© 2026 — Trang web lưu trữ trên Cloudflare Pages</footer>
+  </main>
+
+</body>
+</html>
