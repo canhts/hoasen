@@ -7,13 +7,9 @@
   <title>Lớp Mầm Non Độc Lập Hoa Sen — Tham quan ngôi trường 2D tương tác</title>
   <meta
     name="description"
-    content="Chuyến tham quan tương tác 2D giới thiệu Lớp Mầm Non Độc Lập Hoa Sen tại Đội 3, thôn Lâm Lộc Nam, xã Sơn Tịnh, tỉnh Quảng Ngãi."
+    content="Chuyến tham quan tương tác 2D giới thiệu Lớp Mầm Non Độc Lập Hoa Sen tại 5P5Q+5G8, Lâm Lộc, Sơn Tịnh, Quảng Ngãi."
   />
-  <link
-    rel="icon"
-    type="image/svg+xml"
-    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 28'%3E%3Cpath d='M18 4C14.8 9.5 14.5 16.5 18 22C21.5 16.5 21.2 9.5 18 4Z' fill='%23E87A90'/%3E%3Cpath d='M18 22C12 20.5 7.5 15.5 6.5 9.5C11.5 10.5 15.5 15 18 22Z' fill='%23F29FB1'/%3E%3Cpath d='M18 22C24 20.5 28.5 15.5 29.5 9.5C24.5 10.5 20.5 15 18 22Z' fill='%23F29FB1'/%3E%3C/svg%3E"
-  />
+  <link rel="icon" type="image/png" href="assets/images/logo-hoa-sen.png" />
 
   <!-- Font chữ tiếng Việt mềm mại, giàu chất kể chuyện & dễ đọc -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -26,19 +22,20 @@
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
-  <!-- Lớp hạt giấy mịn (Paper Grain ~2.8%) tạo cảm giác sách tranh thủ công -->
+  <!-- Lớp hạt giấy mịn (Paper Grain ~2.8%) -->
   <div class="paper-grain" aria-hidden="true"></div>
 
-  <!-- Thanh header nổi tối giản, trong suốt hòa nền trời -->
+  <!-- Thanh header nổi không viền tối giản -->
   <header class="top-chrome" id="top-chrome">
     <a class="brand-pill" href="#chapter-gate" aria-label="Về đầu hành trình Lớp Mầm Non Độc Lập Hoa Sen">
-      <span class="brand-lotus" aria-hidden="true">
-        <svg viewBox="0 0 36 28" width="28" height="22" fill="none">
-          <path d="M18 4C14.8 9.5 14.5 16.5 18 22C21.5 16.5 21.2 9.5 18 4Z" fill="#E87A90" />
-          <path d="M18 22C12 20.5 7.5 15.5 6.5 9.5C11.5 10.5 15.5 15 18 22Z" fill="#F29FB1" />
-          <path d="M18 22C24 20.5 28.5 15.5 29.5 9.5C24.5 10.5 20.5 15 18 22Z" fill="#F29FB1" />
-          <path d="M9 23.5C14 25.2 22 25.2 27 23.5" stroke="#52A877" stroke-width="2" stroke-linecap="round" />
-        </svg>
+      <span class="brand-lotus">
+        <img
+          id="brand-logo-img"
+          src="assets/images/logo-hoa-sen.png"
+          alt="Logo Mầm Non Hoa Sen"
+          width="34"
+          height="34"
+        />
       </span>
       <span class="brand-text">
         <strong id="brand-name">Mầm Non Hoa Sen</strong>
@@ -53,8 +50,8 @@
     </div>
 
     <div class="chrome-actions">
-      <a class="chrome-link" id="top-contact-link" href="#contact-postcard">Liên hệ</a>
-      <a class="chrome-cta" id="top-call-cta" href="tel:0919040317">
+      <a class="chrome-link" id="top-contact-link" href="#trigger-contact">Liên hệ</a>
+      <a class="chrome-cta" id="top-call-cta" href="tel:0868474194">
         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" aria-hidden="true">
           <path
             d="M5.4 3.5H8.8C9.3 3.5 9.8 3.9 9.9 4.4L10.6 7.4C10.7 7.9 10.5 8.4 10.1 8.7L8.4 9.9C9.5 12.2 11.4 14.1 13.7 15.2L14.9 13.5C15.2 13.1 15.7 12.9 16.2 13L19.2 13.7C19.7 13.8 20.1 14.3 20.1 14.8V18.2C20.1 19.2 19.2 20 18.2 19.9C10.3 19.4 4.1 13.2 3.6 5.3C3.5 4.3 4.4 3.5 5.4 3.5Z"
@@ -64,81 +61,98 @@
             stroke-linejoin="round"
           />
         </svg>
-        <span id="top-call-text">0919.040317</span>
+        <span id="top-call-text">0868.474.194</span>
       </a>
     </div>
   </header>
 
-  <!-- Thanh định vị hành trình dạng chấm tròn tối giản (Pill Stepper) -->
+  <!-- Thanh định vị hành trình tối giản (Pill Stepper cho toàn bộ 10 chặng) -->
   <nav class="journey-stepper" id="journey-stepper" aria-label="Định vị các chặng tham quan"></nav>
 
-  <!-- Luồng kể chuyện liên tục không đứt gãy -->
-  <main id="storybook-main">
-    <!-- PHẦN I: SÂN KHẤU KIẾN TRÚC 2.5D DÍNH MƯỢT + 7 CHẶNG KỂ CHUYỆN -->
+  <!-- KHỐI KỂ CHUYỆN LIỀN MẠCH DUY NHẤT TỪ CỔNG TRƯỜNG ĐẾN LIÊN HỆ -->
+  <main id="storybook-main" class="unified-story-root">
+    <!-- PHẦN A: HÀNH TRÌNH KIẾN TRÚC 2.5D (Chặng 1 -> Chặng 7) -->
     <section class="campus-journey" id="campus-journey" aria-label="Hành trình tham quan khuôn viên trường">
-      <!-- Sân khấu 4 lớp Parallax cố định theo nhịp cuộn -->
       <div class="stage-viewport" id="stage-viewport">
         <div class="stage-sky-backdrop" id="stage-sky-backdrop" aria-hidden="true"></div>
         <div class="stage-canvas" id="stage-canvas">
-          <!-- scenes.js sẽ dựng 3 lớp SVG: Hậu cảnh, Kiến trúc Trung cảnh, Tiền cảnh -->
           <div class="svg-layer-host" id="svg-scene-host"></div>
-          <!-- pathGuide.js sẽ dựng Đường nét & Cánh Hoa Sen dẫn chuyện liên tục -->
           <div class="svg-guide-host" id="svg-guide-host"></div>
         </div>
-        <!-- Lớp chuyển sắc mờ phía dưới trên Mobile để tranh hòa thẳng vào nội dung -->
         <div class="stage-bottom-mist" aria-hidden="true"></div>
       </div>
 
-      <!-- Các chặng câu chuyện trượt qua sân khấu (app.js render từ data.js) -->
       <div class="story-track" id="story-track"></div>
     </section>
 
-    <!-- PHẦN II: CHẶNG 8 — HÒA QUYỆN ẢNH THẬT, CÔ GIÁO & BƯU THIẾP LIÊN HỆ VÀO BỨC TRANH -->
-    <section class="epilogue-canvas" id="chapter-epilogue" data-chapter="epilogue" aria-label="Kỷ niệm, Cô giáo và Liên hệ">
-      <!-- Đường dẫn chuyện & dây hoa sen nối liền từ sân khấu phía trên -->
-      <div class="epilogue-vine-layer" id="epilogue-vine-layer" aria-hidden="true"></div>
+    <!-- PHẦN B: CHUYỂN TIẾP LIỀN MẠCH KHOẢNH KHẮC -> GIÁO VIÊN -> LIÊN HỆ -->
+    <section class="epilogue-journey" id="epilogue-journey" aria-label="Khoảnh khắc, Giáo viên và Liên hệ">
+      <!-- Trên Desktop (>=1024px): sân khấu ghim thống nhất 100svh chuyển cảnh bằng GSAP Scrub -->
+      <div class="epilogue-stage-sticky" id="epilogue-stage-sticky">
+        <div class="epilogue-sky-morph" id="epilogue-sky-morph" aria-hidden="true"></div>
+        <div class="epilogue-vine-layer" id="epilogue-vine-layer" aria-hidden="true"></div>
 
-      <!-- 8A. Dây cờ ảnh kỷ niệm -->
-      <div class="epilogue-band gallery-band" id="gallery-band">
-        <div class="band-intro" id="gallery-intro"></div>
-        <div class="bunting-gallery-wrap">
-          <svg class="bunting-cord-svg" viewBox="0 0 1200 130" preserveAspectRatio="none" aria-hidden="true">
-            <path
-              id="bunting-cord-path"
-              d="M -20 42 Q 300 108, 600 44 T 1220 48"
-              fill="none"
-              stroke="#E87A90"
-              stroke-width="3.2"
-              stroke-dasharray="9 7"
-              stroke-linecap="round"
-            />
-          </svg>
-          <div class="photo-bunting-grid" id="photo-bunting-grid"></div>
+        <!-- 3 cảnh nối tiếp nhau bằng animation chuyển cảnh mượt mà -->
+        <div class="epilogue-panels-stage" id="epilogue-panels-stage">
+          <!-- Cảnh 8: Khoảnh khắc treo ngẫu nhiên tự nhiên -->
+          <div class="epilogue-scene-panel is-gallery" id="panel-gallery" data-epilogue-panel="gallery">
+            <div class="band-intro" id="gallery-intro"></div>
+            <div class="bunting-gallery-wrap">
+              <svg class="bunting-cord-svg" viewBox="0 0 1200 150" preserveAspectRatio="none" aria-hidden="true">
+                <path
+                  d="M -20 34 Q 260 112, 600 44 T 1220 38"
+                  fill="none"
+                  stroke="#E87A90"
+                  stroke-opacity="0.55"
+                  stroke-width="3"
+                  stroke-dasharray="8 8"
+                  stroke-linecap="round"
+                />
+                <path
+                  d="M -20 96 Q 340 30, 720 105 T 1220 82"
+                  fill="none"
+                  stroke="#389FAD"
+                  stroke-opacity="0.32"
+                  stroke-width="2.4"
+                  stroke-dasharray="6 8"
+                  stroke-linecap="round"
+                />
+              </svg>
+              <div class="photo-bunting-grid" id="photo-bunting-grid"></div>
+            </div>
+            <p class="gallery-note" id="gallery-note"></p>
+          </div>
+
+          <!-- Cảnh 9: Vườn Hoa Sen — Đội ngũ cô giáo -->
+          <div class="epilogue-scene-panel is-teachers" id="panel-teachers" data-epilogue-panel="teachers">
+            <div class="garden-decor-back" id="garden-decor-back" aria-hidden="true"></div>
+            <div class="band-intro" id="teachers-intro"></div>
+            <div class="teachers-garden-grid" id="teachers-garden-grid"></div>
+            <div class="garden-decor-front" id="garden-decor-front" aria-hidden="true"></div>
+          </div>
+
+          <!-- Cảnh 10: Bưu thiếp chiều nắng ấm — Liên hệ & Bản đồ -->
+          <div class="epilogue-scene-panel is-contact" id="panel-contact" data-epilogue-panel="contact">
+            <div class="sunset-glow" aria-hidden="true"></div>
+            <div class="postcard-layout">
+              <div class="mini-gate-art" id="mini-gate-art" aria-hidden="true"></div>
+              <article class="postcard-card" id="postcard-card" aria-label="Thông tin liên hệ Lớp Mầm Non Độc Lập Hoa Sen"></article>
+            </div>
+            <footer class="storybook-colophon" id="storybook-colophon"></footer>
+          </div>
         </div>
-        <p class="gallery-note" id="gallery-note"></p>
       </div>
 
-      <!-- 8B. Vườn Hoa Sen yêu thương — Đội ngũ Cô giáo -->
-      <div class="epilogue-band teachers-band" id="teachers-band">
-        <div class="garden-decor-back" id="garden-decor-back" aria-hidden="true"></div>
-        <div class="band-intro" id="teachers-intro"></div>
-        <div class="teachers-garden-grid" id="teachers-garden-grid"></div>
-        <div class="garden-decor-front" id="garden-decor-front" aria-hidden="true"></div>
-      </div>
-
-      <!-- 8C. Bưu thiếp chiều nắng ấm tại Sơn Tịnh — Liên hệ & Bản đồ -->
-      <div class="epilogue-band contact-band" id="contact-postcard">
-        <div class="sunset-glow" aria-hidden="true"></div>
-        <div class="postcard-layout">
-          <div class="mini-gate-art" id="mini-gate-art" aria-hidden="true"></div>
-          <article class="postcard-card" id="postcard-card" aria-label="Thông tin liên hệ Lớp Mầm Non Độc Lập Hoa Sen"></article>
-        </div>
-        <footer class="storybook-colophon" id="storybook-colophon"></footer>
+      <!-- Đường ray cuộn điều phối GSAP Scrub trên Desktop cho 3 cảnh cuối -->
+      <div class="epilogue-scroll-triggers" id="epilogue-scroll-triggers" aria-hidden="true">
+        <div class="epilogue-trigger-slot" id="trigger-gallery" data-chapter="gallery"></div>
+        <div class="epilogue-trigger-slot" id="trigger-teachers" data-chapter="teachers"></div>
+        <div class="epilogue-trigger-slot" id="trigger-contact" data-chapter="contact"></div>
       </div>
     </section>
   </main>
 
-  <!-- Lightbox phóng to ảnh hoạt động thật (hỗ trợ ESC, mũi tên & vuốt cảm ứng) -->
+  <!-- Lightbox phóng to ảnh hoạt động thật (không viền, hỗ trợ ESC, mũi tên & vuốt) -->
   <div class="lightbox" id="photo-lightbox" data-lenis-prevent role="dialog" aria-modal="true" aria-labelledby="lightbox-title" hidden>
     <div class="lightbox-backdrop" data-lightbox-close></div>
     <div class="lightbox-panel">
@@ -165,7 +179,7 @@
           </figcaption>
         </figure>
 
-        <button class="lightbox-nav next" type="button" id="lightbox-next-btn" aria-label="Ảnh tiếp theo">
+        <button class="lightbox-nav next" type="button" id="lightbox-next-btn" aria-label="Ảnh sau">
           <svg viewBox="0 0 24 24" width="22" height="22" fill="none" aria-hidden="true">
             <path d="M9 5L16 12L9 19" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
           </svg>

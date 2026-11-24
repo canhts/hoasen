@@ -15,9 +15,14 @@ import {
 } from "./art/pathGuide.js";
 import { initChoreography } from "./choreography.js";
 
-/**
- * Tạo HTML danh sách huy hiệu (badge)
- */
+function escapeHtml(text = "") {
+  return String(text)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;");
+}
+
 function renderBadgesHtml(badges = []) {
   if (!badges.length) return "";
   return `
@@ -32,20 +37,6 @@ function renderBadgesHtml(badges = []) {
   `;
 }
 
-/**
- * Chống chèn ký tự đặc biệt ngoài ý muốn khi render chuỗi
- */
-function escapeHtml(text = "") {
-  return String(text)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;");
-}
-
-/**
- * Tạo SVG fallback gọn đẹp nếu ảnh hoạt động chưa gán / lỗi tải
- */
 function createPhotoFallbackDataUri(title) {
   const safeTitle = escapeHtml(title).slice(0, 40);
   const svg = `
@@ -62,10 +53,12 @@ function createPhotoFallbackDataUri(title) {
 }
 
 /**
- * Render phần đầu Chrome & Meta từ dữ liệu duy nhất
+ * Hydrate logo ảnh, tên trường & số điện thoại chính trên thanh Chrome
  */
 function hydrateTopChrome() {
   const { schoolInfo, uiText } = SCHOOL_DATA;
+  const logoImg = document.getElementById("brand-logo-img");
+  if (logoImg && schoolInfo.logoSrc) logoImg.src = schoolInfo.logoSrc;
   document.getElementById("brand-name").textContent = schoolInfo.shortName;
   document.getElementById("brand-sub").textContent = uiText.brandTag;
   document.getElementById("top-call-text").textContent = schoolInfo.phoneDisplay;
@@ -74,11 +67,13 @@ function hydrateTopChrome() {
 }
 
 /**
- * Render 7 chặng hành trình trên Sân khấu kiến trúc
+ * Render 7 chặng hành trình kiến trúc (Cổng -> Văn phòng/Bếp -> Sân chơi -> Nhà trẻ -> Mẫu giáo bé -> Cầu thang -> Lầu 2)
  */
 function renderStoryTrack() {
   const track = document.getElementById("story-track");
-  const stageChapters = SCHOOL_DATA.chapters.filter((ch) => ch.id !== "epilogue");
+  const stageChapters = SCHOOL_DATA.chapters.filter(
+    (ch) => !["gallery", "teachers", "contact"].includes(ch.id)
+  );
 
   track.innerHTML = stageChapters
     .map((ch) => {
@@ -150,12 +145,12 @@ function renderStoryTrack() {
 }
 
 /**
- * Render Chặng 8: Dây cờ ảnh kỷ niệm + Vườn Cô giáo + Bưu thiếp Sơn Tịnh
+ * Render Cảnh 8 (Khoảnh khắc treo ngẫu nhiên), Cảnh 9 (Giáo viên từng lớp), Cảnh 10 (Liên hệ & Bản đồ)
  */
 function renderEpilogue() {
   const { gallery, teachersSection, contactSection, schoolInfo, uiText } = SCHOOL_DATA;
 
-  // 8A. Dây cờ ảnh
+  // Cảnh 8: Khoảnh khắc treo ngẫu nhiên, lệch tầng & nghiêng dễ thương
   document.getElementById("gallery-intro").innerHTML = `
     <span class="chapter-eyebrow">${escapeHtml(gallery.eyebrow)}</span>
     <h2>${escapeHtml(gallery.title)}</h2>
@@ -169,7 +164,7 @@ function renderEpilogue() {
       <button
         type="button"
         class="bunting-photo-card"
-        style="--card-tilt: ${item.tilt || 0}deg;"
+        style="--card-tilt: ${item.tilt || 0}deg; --card-drop: ${item.drop || 0}px;"
         data-photo-index="${idx}"
         aria-label="Phóng to ảnh: ${escapeHtml(item.title)}"
       >
@@ -190,7 +185,6 @@ function renderEpilogue() {
     )
     .join("");
 
-  // Gắn fallback SVG cho ảnh gallery nếu file bị thiếu
   photoGrid.querySelectorAll("img").forEach((img, idx) => {
     img.addEventListener(
       "error",
@@ -203,7 +197,7 @@ function renderEpilogue() {
 
   document.getElementById("gallery-note").textContent = uiText.galleryHint;
 
-  // 8B. Vườn Hoa Sen — Đội ngũ Cô giáo
+  // Cảnh 9: Đội ngũ giáo viên theo đúng từng lớp
   document.getElementById("teachers-intro").innerHTML = `
     <span class="chapter-eyebrow">${escapeHtml(teachersSection.eyebrow)}</span>
     <h2>${escapeHtml(teachersSection.title)}</h2>
@@ -211,40 +205,59 @@ function renderEpilogue() {
   `;
 
   const teachersGrid = document.getElementById("teachers-garden-grid");
-  teachersGrid.innerHTML = teachersSection.members
-    .map((teacher) => {
-      const initialSrc = teacher.photo ? escapeHtml(teacher.photo) : createTeacherFallbackDataUri(teacher);
+  teachersGrid.innerHTML = teachersSection.groups
+    .map((group) => {
+      const isSingle = group.teachers.length === 1;
+      const avatarsHtml = group.teachers
+        .map((t) => {
+          const src = t.photo ? escapeHtml(t.photo) : createTeacherFallbackDataUri(t);
+          return `
+          <div class="petal-avatar-unit">
+            <div class="petal-frame">
+              <img
+                src="${src}"
+                alt="${escapeHtml(t.name)} — ${escapeHtml(group.classLabel)}"
+                loading="lazy"
+                decoding="async"
+              />
+            </div>
+            <span class="teacher-mini-name">${escapeHtml(t.name)}</span>
+          </div>`;
+        })
+        .join("");
+
       return `
       <article class="teacher-petal-card">
-        <div class="petal-frame">
-          <img
-            src="${initialSrc}"
-            alt="${escapeHtml(teacher.name)} — ${escapeHtml(teacher.classLabel)}"
-            loading="lazy"
-            decoding="async"
-          />
+        <div class="teacher-avatars-row ${isSingle ? "is-single" : ""}">
+          ${avatarsHtml}
         </div>
-        <span class="teacher-class-pill">${escapeHtml(teacher.classLabel)}</span>
-        <h3>${escapeHtml(teacher.name)}</h3>
-        <span class="teacher-role">${escapeHtml(teacher.role)}</span>
-        <p class="teacher-quote">“${escapeHtml(teacher.quote)}”</p>
+        <span class="teacher-class-pill">${escapeHtml(group.classLabel)}</span>
+        <h3>${escapeHtml(group.namesDisplay)}</h3>
+        <p class="teacher-quote">“${escapeHtml(group.quote)}”</p>
       </article>
     `;
     })
     .join("");
 
-  teachersGrid.querySelectorAll("img").forEach((img, idx) => {
-    img.addEventListener(
-      "error",
-      () => {
-        img.src = createTeacherFallbackDataUri(teachersSection.members[idx]);
-      },
-      { once: true }
-    );
-  });
-
-  // 8C. Bưu thiếp chiều nắng ấm tại Sơn Tịnh
+  // Cảnh 10: Bưu thiếp chiều nắng ấm tại Sơn Tịnh
   renderMiniSunsetGateSvg(document.getElementById("mini-gate-art"));
+
+  const contactsHtml = schoolInfo.contacts
+    .map(
+      (person) => `
+      <div class="contact-person-pill">
+        <div class="contact-person-meta">
+          <strong>${escapeHtml(person.label)}</strong>
+          <span>${escapeHtml(person.phoneDisplay)}</span>
+        </div>
+        <div class="contact-mini-actions">
+          <a class="mini-action-btn call" href="${escapeHtml(person.phoneHref)}" aria-label="Gọi ${escapeHtml(person.label)} ${escapeHtml(person.phoneDisplay)}">Gọi</a>
+          <a class="mini-action-btn zalo" href="${escapeHtml(person.zaloHref)}" target="_blank" rel="noopener noreferrer" aria-label="Nhắn Zalo ${escapeHtml(person.label)}">Zalo</a>
+        </div>
+      </div>
+    `
+    )
+    .join("");
 
   const postcardEl = document.getElementById("postcard-card");
   postcardEl.innerHTML = `
@@ -273,13 +286,11 @@ function renderEpilogue() {
       </div>
     </div>
 
+    <div class="contacts-split">
+      ${contactsHtml}
+    </div>
+
     <div class="postcard-actions">
-      <a class="action-btn primary" href="${escapeHtml(schoolInfo.phoneHref)}">
-        <span>Gọi ngay ${escapeHtml(schoolInfo.phoneDisplay)}</span>
-      </a>
-      <a class="action-btn zalo" href="${escapeHtml(schoolInfo.zaloHref)}" target="_blank" rel="noopener noreferrer">
-        <span>${escapeHtml(contactSection.zaloActionText)}</span>
-      </a>
       <a class="action-btn maps" href="${escapeHtml(schoolInfo.maps.directUrl)}" target="_blank" rel="noopener noreferrer">
         <span>${escapeHtml(schoolInfo.maps.buttonLabel)}</span>
       </a>
@@ -297,12 +308,9 @@ function renderEpilogue() {
   `;
 
   document.getElementById("storybook-colophon").textContent =
-    `${schoolInfo.name} • ${schoolInfo.address} • ĐT/Zalo: ${schoolInfo.phoneDisplay}`;
+    `${schoolInfo.name} • ${schoolInfo.address} • Chú Cảnh: 0868.474.194 • Cô Hường: 0975.551.545`;
 }
 
-/**
- * Render thanh định vị hành trình tối giản (Pill Stepper)
- */
 function renderStepper(onSelectChapter) {
   const stepper = document.getElementById("journey-stepper");
   stepper.innerHTML = SCHOOL_DATA.chapters
@@ -324,14 +332,11 @@ function renderStepper(onSelectChapter) {
   stepper.querySelectorAll(".stepper-item").forEach((btn) => {
     btn.addEventListener("click", () => {
       const targetId = btn.getAttribute("data-target-chapter");
-      onSelectChapter(`#chapter-${targetId}`);
+      onSelectChapter(targetId);
     });
   });
 }
 
-/**
- * Cập nhật trạng thái chặng đang xem cho Pill Stepper & Mobile Progress Pill
- */
 function setActiveChapter(chapterId) {
   const chapter = SCHOOL_DATA.chapters.find((c) => c.id === chapterId);
   if (!chapter) return;
@@ -346,9 +351,6 @@ function setActiveChapter(chapterId) {
   }
 }
 
-/**
- * Khởi tạo Lightbox phóng to ảnh hoạt động (ESC, mũi tên, vuốt mobile)
- */
 function initLightbox() {
   const photos = SCHOOL_DATA.gallery.photos;
   const modal = document.getElementById("photo-lightbox");
@@ -435,9 +437,6 @@ function initLightbox() {
   );
 }
 
-/**
- * Khởi chạy toàn bộ trang kể chuyện Hoa Sen
- */
 function bootstrap() {
   hydrateTopChrome();
   renderCampusScene(document.getElementById("svg-scene-host"));
@@ -455,16 +454,15 @@ function bootstrap() {
     onChapterChange: setActiveChapter,
   });
 
-  renderStepper((selector) => controller.scrollToTarget(selector));
+  renderStepper((targetId) => controller.scrollToTarget(targetId));
 
-  // Điều hướng mượt cho nút "Về đầu" và "Liên hệ" ở top chrome
   document.querySelector(".brand-pill").addEventListener("click", (e) => {
     e.preventDefault();
-    controller.scrollToTarget("#chapter-gate");
+    controller.scrollToTarget("gate");
   });
   document.getElementById("top-contact-link").addEventListener("click", (e) => {
     e.preventDefault();
-    controller.scrollToTarget("#contact-postcard");
+    controller.scrollToTarget("contact");
   });
 
   initLightbox();
