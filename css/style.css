@@ -357,7 +357,7 @@ a {
   top: 0;
   left: 0;
   width: 3200px;
-  height: 1850px;
+  height: 2100px;
   transform-origin: 0 0;
   pointer-events: none;
   will-change: transform;
@@ -366,7 +366,7 @@ a {
 .svg-layer-host svg,
 .svg-guide-host svg {
   width: 3200px;
-  height: 1850px;
+  height: 2100px;
   display: block;
 }
 

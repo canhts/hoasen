@@ -1,22 +1,45 @@
 /**
  * ============================================================================
- * ĐƯỜNG NÉT NGHỆ THUẬT, CÁNH HOA SEN DẪN CHUYỆN & CHÂN DUNG CÔ GIÁO
+ * ĐƯỜNG NÉT NGHỆ THUẬT, CÁNH HOA SEN DẪN CHUYỆN (ISOMETRIC 30°) & CHÂN DUNG CÔ GIÁO
  * ============================================================================
  */
 
-import { renderCementColorFence } from "./scenes.js";
+import { iso } from "./scenes.js";
 
 /**
- * Đường dẫn chuyện xuyên suốt khuôn viên theo thứ tự mới:
- * Cổng -> Văn phòng (Camera 24/7) -> Kho -> Thực đơn -> Bếp
- * -> Chuyển thẳng sang Sân chơi chính -> Nhà trẻ -> Mẫu giáo bé -> Cầu thang -> Lầu 2 -> Khoảnh khắc
+ * Đường dẫn chuyện liên kết toàn bộ bản đồ Isometric 30 độ theo đúng hành trình:
+ * Cổng -> Văn phòng (Camera 24/7) -> Kho -> Thực đơn -> Bếp -> Sân chơi chính -> Nhà trẻ -> Mẫu giáo bé -> Cầu thang -> Lầu 2 -> Khoảnh khắc
  */
 export function renderCampusGuideSvg(hostEl) {
+  const pts = [
+    iso(1120, 785, 4),
+    iso(1120, 625, 4),
+    iso(1465, 625, 4),
+    iso(1825, 625, 4),
+    iso(1120, 635, 4),
+    iso(240, 635, 4),
+    iso(580, 625, 4),
+    iso(860, 625, 4),
+    iso(1310, 345, 6),
+    iso(1310, 120, 148),
+    iso(1550, 100, 148),
+    iso(970, 100, 148),
+    iso(600, -180, 150),
+  ];
+
+  const d = pts
+    .map(([x, y], idx) => (idx === 0 ? `M ${x} ${y}` : `L ${x} ${y}`))
+    .join(" ");
+
+  const [startX, startY] = pts[0];
+  const [paX, paY] = iso(580, 520, 20);
+  const [pbX, pbY] = iso(1310, 220, 90);
+
   hostEl.innerHTML = `
   <svg
     id="guide-svg"
     class="guide-svg"
-    viewBox="0 0 3200 1850"
+    viewBox="0 0 3200 2100"
     preserveAspectRatio="xMidYMid slice"
     aria-hidden="true"
   >
@@ -28,60 +51,36 @@ export function renderCampusGuideSvg(hostEl) {
 
     <path
       id="campus-story-path-bg"
-      d="M 2130 1630
-         C 2145 1575, 2400 1575, 2650 1570
-         C 2880 1565, 3060 1565, 3060 1592
-         C 3060 1618, 1460 1618, 450 1582
-         C 360 1578, 720 1582, 1110 1582
-         C 1420 1582, 1690 1582, 1980 1578
-         C 2240 1575, 2370 1545, 2405 1475
-         C 2450 1370, 2445 1130, 2395 1015
-         C 2345 900, 2215 760, 2245 705
-         C 2280 655, 2640 704, 2860 704
-         C 2950 704, 2600 714, 2140 714
-         C 1780 714, 1500 714, 1280 714
-         C 1040 714, 960 900, 1020 1180
-         C 1085 1470, 1380 1690, 1600 1850"
+      d="${d}"
       fill="none"
       stroke="#E87A90"
-      stroke-opacity="0.18"
-      stroke-width="3"
-      stroke-dasharray="9 9"
+      stroke-opacity="0.22"
+      stroke-width="4"
+      stroke-dasharray="10 10"
       stroke-linecap="round"
+      stroke-linejoin="round"
     />
 
     <path
       id="campus-story-path"
-      d="M 2130 1630
-         C 2145 1575, 2400 1575, 2650 1570
-         C 2880 1565, 3060 1565, 3060 1592
-         C 3060 1618, 1460 1618, 450 1582
-         C 360 1578, 720 1582, 1110 1582
-         C 1420 1582, 1690 1582, 1980 1578
-         C 2240 1575, 2370 1545, 2405 1475
-         C 2450 1370, 2445 1130, 2395 1015
-         C 2345 900, 2215 760, 2245 705
-         C 2280 655, 2640 704, 2860 704
-         C 2950 704, 2600 714, 2140 714
-         C 1780 714, 1500 714, 1280 714
-         C 1040 714, 960 900, 1020 1180
-         C 1085 1470, 1380 1690, 1600 1850"
+      d="${d}"
       fill="none"
       stroke="#E87A90"
-      stroke-opacity="0.72"
-      stroke-width="3.2"
+      stroke-opacity="0.76"
+      stroke-width="4.2"
       stroke-linecap="round"
+      stroke-linejoin="round"
     />
 
-    <g id="floating-lotus-lead" filter="url(#petalGlow)" transform="translate(2130, 1630)">
+    <g id="floating-lotus-lead" filter="url(#petalGlow)" transform="translate(${startX}, ${startY})">
       <path d="M 0 -16 C -11 -4 -10 10 0 16 C 10 10 11 -4 0 -16 Z" fill="#E87A90"/>
       <path d="M 0 -10 C -5 -2 -5 6 0 11 C 5 6 5 -2 0 -10 Z" fill="#F9DCE4"/>
     </g>
 
-    <g id="floating-petal-a" opacity="0.85" transform="translate(1110, 1360)">
+    <g id="floating-petal-a" opacity="0.85" transform="translate(${paX}, ${paY})">
       <path d="M 0 -10 C -7 -2 -6 7 0 10 C 6 7 7 -2 0 -10 Z" fill="#F29FB1"/>
     </g>
-    <g id="floating-petal-b" opacity="0.8" transform="translate(2420, 960)">
+    <g id="floating-petal-b" opacity="0.8" transform="translate(${pbX}, ${pbY})">
       <path d="M 0 -9 C -6 -2 -5 6 0 9 C 5 6 6 -2 0 -9 Z" fill="#E87A90"/>
     </g>
   </svg>
@@ -135,8 +134,19 @@ export function renderLotusGardenDecor(backHost, frontHost) {
   `;
 }
 
+function renderPostcardCementFence(startX, count, topY, height = 56, pitch = 22) {
+  const palette = ["#F4C96B", "#E87A90", "#389FAD", "#A68AD9", "#52A877"];
+  const endX = startX + count * pitch;
+  let posts = `<rect x="${startX - 4}" y="${topY + 34}" width="${endX - startX + 8}" height="22" rx="6" fill="#EAE1D6"/>`;
+  for (let i = 0; i < count; i++) {
+    const x = startX + i * pitch;
+    posts += `<rect x="${x}" y="${topY}" width="16" height="${height}" rx="8" fill="${palette[i % palette.length]}"/>`;
+  }
+  return posts;
+}
+
 /**
- * Tranh minh họa Cổng Hoa Sen thu nhỏ trong nắng chiều ấm (dùng logo ảnh đính kèm & hàng rào xi măng sơn màu)
+ * Tranh minh họa Cổng Hoa Sen thu nhỏ trong nắng chiều ấm (dùng logo thật & hàng rào xi măng sơn màu)
  */
 export function renderMiniSunsetGateSvg(hostEl) {
   hostEl.innerHTML = `
@@ -155,17 +165,14 @@ export function renderMiniSunsetGateSvg(hostEl) {
     <path d="M 35 235 Q 115 170 215 215 T 385 220 L 385 275 L 35 275 Z" fill="#C4DFC7"/>
     <ellipse cx="210" cy="272" rx="166" ry="24" fill="#E8D2BB"/>
 
-    <!-- Hàng rào xi măng sơn màu bo tròn -->
-    ${renderCementColorFence(46, 3, 210, 56, 22)}
-    ${renderCementColorFence(304, 3, 210, 56, 22)}
+    ${renderPostcardCementFence(46, 3, 210, 56, 22)}
+    ${renderPostcardCementFence(304, 3, 210, 56, 22)}
 
-    <!-- Hai trụ cổng xanh ngọc bo tròn -->
     <rect x="122" y="138" width="28" height="128" rx="10" fill="#389FAD"/>
     <rect x="118" y="130" width="36" height="12" rx="6" fill="#FFFDF9"/>
     <rect x="270" y="138" width="28" height="128" rx="10" fill="#389FAD"/>
     <rect x="266" y="130" width="36" height="12" rx="6" fill="#FFFDF9"/>
 
-    <!-- Cánh cổng bo tròn mở nhẹ sang hai bên -->
     <g fill="#48B8D9">
       <rect x="155" y="158" width="7" height="106" rx="3.5"/>
       <rect x="169" y="158" width="7" height="106" rx="3.5"/>
@@ -177,13 +184,11 @@ export function renderMiniSunsetGateSvg(hostEl) {
     <rect x="152" y="226" width="42" height="38" rx="8" fill="none" stroke="#E87A90" stroke-width="4"/>
     <rect x="226" y="226" width="42" height="38" rx="8" fill="none" stroke="#E87A90" stroke-width="4"/>
 
-    <!-- Biển hiệu Hoa Sen kèm logo thật -->
     <rect x="112" y="76" width="196" height="56" rx="14" fill="#FFFDF9"/>
     <image href="assets/images/logo-hoa-sen.png" x="131" y="88" width="34" height="34" clip-path="url(#miniLogoClip)"/>
     <text x="232" y="96" text-anchor="middle" font-family="Quicksand, sans-serif" font-size="9" font-weight="700" fill="#C43B59">LỚP MẦM NON ĐỘC LẬP</text>
     <text x="232" y="119" text-anchor="middle" font-family="Fraunces, serif" font-size="21" font-weight="700" fill="#E87A90">HOA SEN</text>
 
-    <!-- Lá cờ đỏ sao vàng -->
     <line x1="130" y1="130" x2="112" y2="74" stroke="#8E867E" stroke-width="3" stroke-linecap="round"/>
     <path d="M 112 74 Q 90 68 72 76 L 78 102 Q 96 96 118 102 Z" fill="#D9383A"/>
     <polygon points="94,81 96,87 102,87 97,91 99,97 94,93 89,97 91,91 86,87 92,87" fill="#FFE15A"/>

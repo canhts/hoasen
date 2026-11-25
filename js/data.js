@@ -87,9 +87,9 @@ export const SCHOOL_DATA = {
       ],
       cardSide: "left",
       camera: {
-        desktop: { x: 2130, y: 1275, width: 1620, offsetX: 0.16, offsetY: 0 },
-        tablet: { x: 2130, y: 1280, width: 1460, offsetX: 0, offsetY: 0 },
-        mobile: { x: 2130, y: 1290, width: 1220, offsetX: 0, offsetY: 0 },
+        desktop: { x: 1185, y: 1320, width: 1240, offsetX: 0.16, offsetY: 0 },
+        tablet: { x: 1185, y: 1330, width: 1120, offsetX: 0, offsetY: 0 },
+        mobile: { x: 1185, y: 1340, width: 920, offsetX: 0, offsetY: 0 },
       },
     },
     {
@@ -110,9 +110,9 @@ export const SCHOOL_DATA = {
       ],
       cardSide: "left",
       camera: {
-        desktop: { x: 2630, y: 1280, width: 1460, offsetX: 0.15, offsetY: 0.02 },
-        tablet: { x: 2640, y: 1280, width: 1300, offsetX: 0, offsetY: 0 },
-        mobile: { x: 2700, y: 1280, width: 920, offsetX: 0, offsetY: 0 },
+        desktop: { x: 1640, y: 1445, width: 1340, offsetX: 0.16, offsetY: 0.02 },
+        tablet: { x: 1680, y: 1455, width: 1120, offsetX: 0, offsetY: 0 },
+        mobile: { x: 1700, y: 1465, width: 880, offsetX: 0, offsetY: 0 },
       },
     },
     {
@@ -133,9 +133,9 @@ export const SCHOOL_DATA = {
       ],
       cardSide: "right",
       camera: {
-        desktop: { x: 450, y: 1245, width: 1040, offsetX: -0.16, offsetY: 0.02 },
-        tablet: { x: 450, y: 1245, width: 940, offsetX: 0, offsetY: 0 },
-        mobile: { x: 450, y: 1245, width: 800, offsetX: 0, offsetY: 0 },
+        desktop: { x: 655, y: 845, width: 920, offsetX: -0.16, offsetY: 0.02 },
+        tablet: { x: 655, y: 845, width: 840, offsetX: 0, offsetY: 0 },
+        mobile: { x: 655, y: 845, width: 680, offsetX: 0, offsetY: 0 },
       },
     },
     {
@@ -157,9 +157,9 @@ export const SCHOOL_DATA = {
       ],
       cardSide: "right",
       camera: {
-        desktop: { x: 1110, y: 1280, width: 960, offsetX: -0.17, offsetY: 0.02 },
-        tablet: { x: 1110, y: 1280, width: 880, offsetX: 0, offsetY: 0 },
-        mobile: { x: 1110, y: 1280, width: 660, offsetX: 0, offsetY: 0 },
+        desktop: { x: 955, y: 1010, width: 820, offsetX: -0.17, offsetY: 0.02 },
+        tablet: { x: 955, y: 1010, width: 760, offsetX: 0, offsetY: 0 },
+        mobile: { x: 955, y: 1010, width: 600, offsetX: 0, offsetY: 0 },
       },
     },
     {
@@ -181,9 +181,9 @@ export const SCHOOL_DATA = {
       ],
       cardSide: "right",
       camera: {
-        desktop: { x: 1690, y: 1280, width: 960, offsetX: -0.17, offsetY: 0.02 },
-        tablet: { x: 1690, y: 1280, width: 880, offsetX: 0, offsetY: 0 },
-        mobile: { x: 1690, y: 1280, width: 660, offsetX: 0, offsetY: 0 },
+        desktop: { x: 1200, y: 1150, width: 820, offsetX: -0.17, offsetY: 0.02 },
+        tablet: { x: 1200, y: 1150, width: 760, offsetX: 0, offsetY: 0 },
+        mobile: { x: 1200, y: 1150, width: 600, offsetX: 0, offsetY: 0 },
       },
     },
     {
@@ -204,9 +204,9 @@ export const SCHOOL_DATA = {
       ],
       cardSide: "left",
       camera: {
-        desktop: { x: 2365, y: 1030, width: 920, offsetX: 0.17, offsetY: 0.01 },
-        tablet: { x: 2365, y: 1030, width: 860, offsetX: 0, offsetY: 0 },
-        mobile: { x: 2375, y: 1020, width: 640, offsetX: 0, offsetY: 0 },
+        desktop: { x: 1795, y: 1185, width: 880, offsetX: 0.16, offsetY: 0.01 },
+        tablet: { x: 1795, y: 1185, width: 820, offsetX: 0, offsetY: 0 },
+        mobile: { x: 1795, y: 1185, width: 640, offsetX: 0, offsetY: 0 },
       },
     },
     {
@@ -232,9 +232,9 @@ export const SCHOOL_DATA = {
             { text: "Nhà vệ sinh riêng khép kín cho trẻ", tone: "teal" },
           ],
           camera: {
-            desktop: { x: 2700, y: 490, width: 1120, offsetX: 0.16, offsetY: 0.03 },
-            tablet: { x: 2700, y: 495, width: 980, offsetX: 0, offsetY: 0 },
-            mobile: { x: 2720, y: 495, width: 840, offsetX: 0, offsetY: 0 },
+            desktop: { x: 2295, y: 1125, width: 960, offsetX: 0.16, offsetY: 0.02 },
+            tablet: { x: 2295, y: 1125, width: 880, offsetX: 0, offsetY: 0 },
+            mobile: { x: 2295, y: 1125, width: 700, offsetX: 0, offsetY: 0 },
           },
         },
         {
@@ -249,9 +249,9 @@ export const SCHOOL_DATA = {
             { text: "Nhà vệ sinh riêng khép kín cho trẻ", tone: "teal" },
           ],
           camera: {
-            desktop: { x: 1460, y: 490, width: 1200, offsetX: -0.16, offsetY: 0.03 },
-            tablet: { x: 1460, y: 495, width: 1020, offsetX: 0, offsetY: 0 },
-            mobile: { x: 1440, y: 495, width: 920, offsetX: 0, offsetY: 0 },
+            desktop: { x: 1645, y: 785, width: 980, offsetX: -0.16, offsetY: 0.02 },
+            tablet: { x: 1645, y: 785, width: 900, offsetX: 0, offsetY: 0 },
+            mobile: { x: 1645, y: 785, width: 720, offsetX: 0, offsetY: 0 },
           },
         },
       ],
@@ -261,9 +261,9 @@ export const SCHOOL_DATA = {
       ],
       cardSide: "left",
       camera: {
-        desktop: { x: 2700, y: 490, width: 1120, offsetX: 0.16, offsetY: 0.03 },
-        tablet: { x: 2700, y: 495, width: 980, offsetX: 0, offsetY: 0 },
-        mobile: { x: 2720, y: 495, width: 840, offsetX: 0, offsetY: 0 },
+        desktop: { x: 2295, y: 1125, width: 960, offsetX: 0.16, offsetY: 0.02 },
+        tablet: { x: 2295, y: 1125, width: 880, offsetX: 0, offsetY: 0 },
+        mobile: { x: 2295, y: 1125, width: 700, offsetX: 0, offsetY: 0 },
       },
     },
     {

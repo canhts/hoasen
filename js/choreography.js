@@ -199,25 +199,36 @@ export function initChoreography({ data, onChapterChange }) {
       transformOrigin: "0 0",
     });
 
-    // Khớp vị trí ban đầu của hai cánh cổng chính vào đúng giữa hai trụ cổng
-    const wingW = 208 * init.scale;
-    const wingH = 408 * init.scale;
-    const gateLeftX = init.x + 1922 * init.scale;
-    const gateRightX = init.x + 2130 * init.scale;
-    const gateTopY = init.y + 1206 * init.scale;
+    // Khớp vị trí ban đầu của hai cánh cổng chính vào đúng giữa hai trụ cổng Isometric 30 độ
+    const wingW = 74 * init.scale;
+    const wingH = 104 * init.scale;
+    const gateLeftX = init.x + 1116 * init.scale;
+    const gateRightX = init.x + 1188 * init.scale;
+    const gateLeftY = init.y + 1312 * init.scale;
+    const gateRightY = init.y + 1353 * init.scale;
 
     if (gateLeafLeft && gateLeafRight) {
       gateLeafLeft.style.width = `${wingW}px`;
       gateLeafLeft.style.height = `${wingH}px`;
-      gateLeafRight.style.width = `${wingW}px`;
-      gateDoorSet(gateLeafLeft, gateLeftX, gateTopY);
+      gsap.set(gateLeafLeft, {
+        x: gateLeftX,
+        y: gateLeftY,
+        skewY: 30,
+        scale: 1,
+        autoAlpha: 1,
+        transformOrigin: "0 0",
+      });
+
       gateLeafRight.style.width = `${wingW}px`;
       gateLeafRight.style.height = `${wingH}px`;
-      gateDoorSet(gateLeafRight, gateRightX, gateTopY);
-    }
-
-    function gateDoorSet(el, x, y) {
-      gsap.set(el, { x, y, autoAlpha: 1, scaleX: 1 });
+      gsap.set(gateLeafRight, {
+        x: gateRightX,
+        y: gateRightY,
+        skewY: 30,
+        scale: 1,
+        autoAlpha: 1,
+        transformOrigin: "0 0",
+      });
     }
 
     gsap.set([facadeCurtain, outerWalls, gatePillars, gateSignGroup], { autoAlpha: 1, y: 0 });
@@ -275,8 +286,8 @@ export function initChoreography({ data, onChapterChange }) {
       if (skyLayer) {
         tl.fromTo(
           skyLayer,
-          { x: (from.raw.x - 2130) * 0.22 * parallaxStrength, y: (from.raw.y - 1280) * 0.14 * parallaxStrength },
-          { x: (to.raw.x - 2130) * 0.22 * parallaxStrength, y: (to.raw.y - 1280) * 0.14 * parallaxStrength, ease: "none", immediateRender: false },
+          { x: (from.raw.x - 1185) * 0.18 * parallaxStrength, y: (from.raw.y - 1320) * 0.12 * parallaxStrength },
+          { x: (to.raw.x - 1185) * 0.18 * parallaxStrength, y: (to.raw.y - 1320) * 0.12 * parallaxStrength, ease: "none", immediateRender: false },
           0
         );
       }
@@ -284,8 +295,8 @@ export function initChoreography({ data, onChapterChange }) {
       if (verandaForeground) {
         tl.fromTo(
           verandaForeground,
-          { x: -(from.raw.x - 1800) * 0.08 * parallaxStrength },
-          { x: -(to.raw.x - 1800) * 0.08 * parallaxStrength, ease: "none", immediateRender: false },
+          { x: -(from.raw.x - 1185) * 0.04 * parallaxStrength },
+          { x: -(to.raw.x - 1185) * 0.04 * parallaxStrength, ease: "none", immediateRender: false },
           0
         );
       }
@@ -293,8 +304,8 @@ export function initChoreography({ data, onChapterChange }) {
       if (floor2Trim) {
         tl.fromTo(
           floor2Trim,
-          { x: -(from.raw.x - 2100) * 0.08 * parallaxStrength },
-          { x: -(to.raw.x - 2100) * 0.08 * parallaxStrength, ease: "none", immediateRender: false },
+          { x: -(from.raw.x - 1800) * 0.04 * parallaxStrength },
+          { x: -(to.raw.x - 1800) * 0.04 * parallaxStrength, ease: "none", immediateRender: false },
           0
         );
       }
@@ -302,18 +313,21 @@ export function initChoreography({ data, onChapterChange }) {
       // CHẶNG 1 -> CHẶNG 2: Hai cánh cửa cổng mở dần đối xứng sang hai bên khung hình (KHÔNG biến mất, KHÔNG trượt dồn sang phải!)
       if (from.id === "gate" && to.id === "veranda-kitchen") {
         if (gateLeafLeft && gateLeafRight) {
-          const openLeftX = -wingW * 0.26;
-          const openRightX = vw - wingW * 0.74;
+          const openScale = 1.65;
+          const openW = wingW * openScale;
+          const openY = Math.max(84, vh * 0.48 - (wingH * openScale) * 0.5);
+          const openLeftX = -openW * 0.18;
+          const openRightX = vw - openW * 0.82;
           tl.fromTo(
             gateLeafLeft,
-            { x: gateLeftX, y: gateTopY, autoAlpha: 1 },
-            { x: openLeftX, y: gateTopY, autoAlpha: 1, ease: "power2.inOut", immediateRender: false },
+            { x: gateLeftX, y: gateLeftY, skewY: 30, scale: 1, autoAlpha: 1 },
+            { x: openLeftX, y: openY, skewY: 0, scale: openScale, autoAlpha: 1, ease: "power2.inOut", immediateRender: false },
             0
           );
           tl.fromTo(
             gateLeafRight,
-            { x: gateRightX, y: gateTopY, autoAlpha: 1 },
-            { x: openRightX, y: gateTopY, autoAlpha: 1, ease: "power2.inOut", immediateRender: false },
+            { x: gateRightX, y: gateRightY, skewY: 30, scale: 1, autoAlpha: 1 },
+            { x: openRightX, y: openY, skewY: 0, scale: openScale, autoAlpha: 1, ease: "power2.inOut", immediateRender: false },
             0
           );
         }
@@ -321,8 +335,8 @@ export function initChoreography({ data, onChapterChange }) {
         if (greenCurtains) {
           tl.fromTo(
             greenCurtains,
-            { scaleY: 1, autoAlpha: 0.98 },
-            { scaleY: 0.06, autoAlpha: 0, ease: "power2.inOut", immediateRender: false },
+            { scaleY: 1, autoAlpha: 0.92 },
+            { scaleY: 0.1, autoAlpha: 0, ease: "power2.inOut", immediateRender: false },
             0.08
           );
         }
@@ -337,12 +351,14 @@ export function initChoreography({ data, onChapterChange }) {
 
       // CHẶNG 2 -> CHẶNG 3 (Vào Sân chơi chính): Hai cánh cổng tiếp tục mở thoát ra ngoài hai mép màn hình một cách tự nhiên
       if (from.id === "veranda-kitchen" && to.id === "playground" && gateLeafLeft && gateLeafRight) {
-        const openLeftX = -wingW * 0.26;
-        const openRightX = vw - wingW * 0.74;
+        const openScale = 1.65;
+        const openW = wingW * openScale;
+        const openLeftX = -openW * 0.18;
+        const openRightX = vw - openW * 0.82;
         tl.fromTo(
           gateLeafLeft,
           { x: openLeftX, autoAlpha: 1 },
-          { x: -wingW - 40, autoAlpha: 1, ease: "power1.in", immediateRender: false },
+          { x: -openW - 40, autoAlpha: 1, ease: "power1.in", immediateRender: false },
           0
         );
         tl.fromTo(
