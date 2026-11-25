@@ -202,9 +202,9 @@ export const SCHOOL_DATA = {
       ],
       cardSide: "left",
       camera: {
-        desktop: { x: 1705, y: 1255, width: 960, offsetX: 0.16, offsetY: 0.01 },
-        tablet: { x: 1705, y: 1255, width: 880, offsetX: 0, offsetY: 0 },
-        mobile: { x: 1705, y: 1255, width: 700, offsetX: 0, offsetY: 0 },
+        desktop: { x: 1735, y: 1295, width: 920, offsetX: 0.16, offsetY: 0.01 },
+        tablet: { x: 1735, y: 1295, width: 840, offsetX: 0, offsetY: 0 },
+        mobile: { x: 1735, y: 1295, width: 680, offsetX: 0, offsetY: 0 },
       },
     },
     {
@@ -222,13 +222,13 @@ export const SCHOOL_DATA = {
       ],
       highlights: [
         "Hành lang Lầu 2 nối liền mạch từ cầu thang tới hai sân chơi hai đầu",
-        "Hàng rào sắt bao quanh 3 cạnh Lầu 2 bảo đảm an toàn cho bé",
+        "Hàng rào sắt bao quanh Lầu 2 cùng rào sắc màu trước lớp bảo đảm an toàn cho bé",
       ],
       cardSide: "left",
       camera: {
-        desktop: { x: 2295, y: 1125, width: 980, offsetX: 0.16, offsetY: 0.02 },
-        tablet: { x: 2295, y: 1125, width: 900, offsetX: 0, offsetY: 0 },
-        mobile: { x: 2295, y: 1125, width: 720, offsetX: 0, offsetY: 0 },
+        desktop: { x: 1845, y: 1385, width: 980, offsetX: 0.16, offsetY: 0.02 },
+        tablet: { x: 1845, y: 1385, width: 900, offsetX: 0, offsetY: 0 },
+        mobile: { x: 1845, y: 1385, width: 720, offsetX: 0, offsetY: 0 },
       },
     },
     {
@@ -246,13 +246,13 @@ export const SCHOOL_DATA = {
       ],
       highlights: [
         "Góc sách & bảng chữ cái rèn thói quen học tập chuẩn bị vào Lớp 1",
-        "Nối thẳng ra sân chơi nhỏ bên trái rào sắt an toàn 3 cạnh",
+        "Nối thẳng ra sân chơi nhỏ bên trái rào sắt an toàn Lầu 2",
       ],
       cardSide: "right",
       camera: {
-        desktop: { x: 1520, y: 805, width: 1040, offsetX: -0.2, offsetY: 0.02 },
-        tablet: { x: 1580, y: 785, width: 920, offsetX: 0, offsetY: 0 },
-        mobile: { x: 1610, y: 785, width: 740, offsetX: 0, offsetY: 0 },
+        desktop: { x: 1070, y: 1065, width: 1040, offsetX: -0.2, offsetY: 0.02 },
+        tablet: { x: 1130, y: 1045, width: 920, offsetX: 0, offsetY: 0 },
+        mobile: { x: 1160, y: 1045, width: 740, offsetX: 0, offsetY: 0 },
       },
     },
     {
@@ -293,7 +293,7 @@ export const SCHOOL_DATA = {
         caption: "Hàng cột hồng phấn, dây hoa rực rỡ cùng những bàn ghế nhỏ đầy ắp tiếng cười.",
         tag: "Hiên chính",
         tilt: -4.2,
-        drop: 6,
+        drop: -6,
       },
       {
         src: "assets/images/san-choi-chinh.jpg",
@@ -301,7 +301,7 @@ export const SCHOOL_DATA = {
         caption: "Không gian rộng rãi dưới mái che thoáng mát, cờ dây tung bay mỗi ngày.",
         tag: "Sân chơi",
         tilt: 3.4,
-        drop: 32,
+        drop: 10,
       },
       {
         src: "assets/images/lop-hoc-vui-ve.jpg",
@@ -317,7 +317,7 @@ export const SCHOOL_DATA = {
         caption: "Chiếc bánh kem nhỏ xinh và niềm vui sẻ chia ngay tại lớp học thân quen.",
         tag: "Sinh nhật bé",
         tilt: 4.5,
-        drop: 24,
+        drop: 8,
       },
       {
         src: "assets/images/van-nghe-bieu-dien.jpg",
@@ -325,7 +325,7 @@ export const SCHOOL_DATA = {
         caption: "Những bước nhảy hồn nhiên trong ngày hội văn nghệ thiếu nhi 1/6.",
         tag: "Văn nghệ",
         tilt: -3.6,
-        drop: 28,
+        drop: 8,
       },
       {
         src: "assets/images/trao-thuong-be.jpg",
@@ -333,7 +333,7 @@ export const SCHOOL_DATA = {
         caption: "Các con hân hoan nhận giấy khen cùng phần quà nhỏ từ thầy cô Hoa Sen.",
         tag: "Tổng kết",
         tilt: 2.7,
-        drop: -6,
+        drop: -10,
       },
       {
         src: "assets/images/cong-truong.jpg",
@@ -341,7 +341,7 @@ export const SCHOOL_DATA = {
         caption: "Biển hiệu thân quen, hàng rào xi măng sơn màu cùng bảng Nội quy và Thông báo.",
         tag: "Cổng trường",
         tilt: -4.1,
-        drop: 18,
+        drop: 6,
       },
       {
         src: "assets/images/le-tong-ket.jpg",
@@ -349,7 +349,7 @@ export const SCHOOL_DATA = {
         caption: "Một chặng đường khôn lớn đầy ắp yêu thương của đại gia đình Hoa Sen.",
         tag: "Kỷ niệm",
         tilt: 3.8,
-        drop: 4,
+        drop: -6,
       },
     ],
   },

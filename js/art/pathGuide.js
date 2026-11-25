@@ -12,27 +12,36 @@ import { iso } from "./scenes.js";
  */
 export function renderCampusGuideSvg(hostEl) {
   const pts = [
-    iso(1120, 785, 4),
-    iso(1120, 625, 4),
-    iso(1515, 635, 4),
-    iso(1665, 655, 4),
-    iso(1120, 635, 4),
-    iso(240, 635, 4),
-    iso(580, 625, 4),
-    iso(860, 625, 4),
-    iso(1310, 615, 6),
-    iso(1310, 158, 148),
-    iso(1550, 158, 148),
-    iso(970, 158, 148),
+    iso(1120, 785, 4),   // 0: Chặng 1 - Cổng Hoa Sen
+    iso(1120, 625, 4),   // 1: Qua cổng vào hành lang trước Văn phòng
+    iso(1515, 635, 4),   // 2: Ngang trước Kho dụng cụ
+    iso(1665, 655, 4),   // 3: Chặng 2 - Trước cửa Bếp chữ L
+    iso(1120, 635, 4),   // 4: Trở ra giữa hành lang
+    iso(240, 635, 4),    // 5: Chặng 3 - Sân chơi chính
+    iso(580, 625, 4),    // 6: Chặng 4 - Lớp Nhà trẻ
+    iso(860, 625, 4),    // 7: Chặng 5 - Lớp Mẫu giáo bé
+    iso(1340, 586, 6),   // 8: Chân cầu thang chữ U (vế phải bắt đầu từ hành lang dưới)
+    iso(1340, 386, 76),  // 9: Chặng 6 - Chiếu nghỉ chữ U phía sau
+    iso(1280, 386, 76),  // 10: Quay 180° sang vế 2 bên trái
+    iso(1280, 586, 146), // 11: Lên đỉnh cầu thang quay ra đối diện hành lang
+    iso(1280, 672, 148), // 12: Bước ra hành lang Lầu 2 (ngang hàng trệt, v = 152 + 520 = 672)
+    iso(1550, 672, 148), // 13: Chặng 7 - Trước Lớp Mẫu giáo nhỡ (Lầu 2 phía trước)
+    iso(970, 672, 148),  // 14: Chặng 8 - Dừng trước Lớp Mẫu giáo lớn (Lầu 2 phía trước)
   ];
 
-  const d = pts
-    .map(([x, y], idx) => (idx === 0 ? `M ${x} ${y}` : `L ${x} ${y}`))
-    .join(" ");
+  const cumDist = [0];
+  for (let i = 1; i < pts.length; i++) {
+    const dx = pts[i][0] - pts[i - 1][0];
+    const dy = pts[i][1] - pts[i - 1][1];
+    cumDist.push(cumDist[i - 1] + Math.hypot(dx, dy));
+  }
+  const totalPolyLen = cumDist[cumDist.length - 1] || 1;
+  const stopRatios = [0, 3, 5, 6, 7, 9, 13, 14].map((idx) => +(cumDist[idx] / totalPolyLen).toFixed(5));
+
+  const toPathD = (arr) => arr.map(([x, y], idx) => (idx === 0 ? `M ${x} ${y}` : `L ${x} ${y}`)).join(" ");
+  const d = toPathD(pts);
 
   const [startX, startY] = pts[0];
-  const [paX, paY] = iso(580, 520, 20);
-  const [pbX, pbY] = iso(1310, 220, 90);
 
   hostEl.innerHTML = `
   <svg
@@ -44,45 +53,24 @@ export function renderCampusGuideSvg(hostEl) {
   >
     <defs>
       <filter id="petalGlow" x="-40%" y="-40%" width="180%" height="180%">
-        <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#E87A90" flood-opacity="0.35"/>
+        <feDropShadow dx="0" dy="2.5" stdDeviation="3.5" flood-color="#E87A90" flood-opacity="0.32"/>
       </filter>
     </defs>
 
-    <path
-      id="campus-story-path-bg"
-      d="${d}"
-      fill="none"
-      stroke="#E87A90"
-      stroke-opacity="0.22"
-      stroke-width="4"
-      stroke-dasharray="10 10"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-    />
-
+    <!-- Đường hình học ẩn dùng để nội suy tọa độ chấm hành trình, không vẽ đường liền hay đường gạch nối -->
     <path
       id="campus-story-path"
       d="${d}"
+      data-stop-ratios='${JSON.stringify(stopRatios)}'
       fill="none"
-      stroke="#E87A90"
-      stroke-opacity="0.76"
-      stroke-width="4.2"
-      stroke-linecap="round"
-      stroke-linejoin="round"
+      stroke="none"
     />
 
     <g id="floating-lotus-lead" filter="url(#petalGlow)" transform="translate(${startX}, ${startY})">
-      <circle class="anim-cursor-ring" cx="0" cy="0" r="17" fill="#E87A90" opacity="0.28"/>
-      <circle cx="0" cy="0" r="12" fill="#FFFDF9"/>
-      <circle cx="0" cy="0" r="8.5" fill="#E87A90"/>
-      <circle cx="0" cy="0" r="3.4" fill="#FFFDF9"/>
-    </g>
-
-    <g id="floating-petal-a" opacity="0.85" transform="translate(${paX}, ${paY})">
-      <path d="M 0 -10 C -7 -2 -6 7 0 10 C 6 7 7 -2 0 -10 Z" fill="#F29FB1"/>
-    </g>
-    <g id="floating-petal-b" opacity="0.8" transform="translate(${pbX}, ${pbY})">
-      <path d="M 0 -9 C -6 -2 -5 6 0 9 C 5 6 6 -2 0 -9 Z" fill="#E87A90"/>
+      <circle class="anim-cursor-ring" cx="0" cy="0" r="14" fill="#E87A90" opacity="0.28"/>
+      <circle cx="0" cy="0" r="9.5" fill="#FFFDF9"/>
+      <circle cx="0" cy="0" r="6.5" fill="#E87A90"/>
+      <circle cx="0" cy="0" r="2.6" fill="#FFFDF9"/>
     </g>
   </svg>
   `;
@@ -102,35 +90,145 @@ export function renderEpilogueVineSvg(hostEl) {
          C 980 860, 240 890, 560 1160"
       fill="none"
       stroke="#E87A90"
-      stroke-opacity="0.32"
-      stroke-width="3"
-      stroke-dasharray="9 9"
+      stroke-opacity="0.28"
+      stroke-width="2"
+      stroke-dasharray="7 7"
       stroke-linecap="round"
     />
-    <path d="M 215 280 C 206 290 207 302 216 307 C 225 302 226 290 215 280 Z" fill="#F29FB1" opacity="0.72"/>
-    <path d="M 960 620 C 950 631 951 644 961 650 C 971 644 972 631 960 620 Z" fill="#E87A90" opacity="0.68"/>
   </svg>
   `;
 }
 
+function renderPondLilyPad(cx, cy, rx, ry, notchSide = 1, opacity = 0.9) {
+  const nX = notchSide * rx * 0.88;
+  const nY = -ry * 0.25;
+  const nX2 = notchSide * rx * 0.96;
+  const nY2 = ry * 0.16;
+  const veins = [0, 38, 82, 130, 178, 226, 276, 318]
+    .map((deg) => {
+      const r = (deg * Math.PI) / 180;
+      const vx = (Math.cos(r) * rx * 0.78).toFixed(1);
+      const vy = (Math.sin(r) * ry * 0.76).toFixed(1);
+      return `<path d="M 0 0 Q ${(vx * 0.5).toFixed(1)} ${(vy * 0.45 - 1.5).toFixed(1)} ${vx} ${vy}" stroke="#59A374" stroke-width="1.2" fill="none" opacity="0.55" stroke-linecap="round"/>`;
+    })
+    .join("");
+  return `
+    <g transform="translate(${cx}, ${cy})" opacity="${opacity}">
+      <ellipse cx="0" cy="${(ry * 0.42).toFixed(1)}" rx="${(rx * 1.12).toFixed(1)}" ry="${(ry * 0.92).toFixed(1)}" fill="none" stroke="#FFFFFF" stroke-width="1.5" opacity="0.55"/>
+      <ellipse cx="0" cy="4" rx="${rx}" ry="${ry}" fill="#539A6C" opacity="0.22"/>
+      <path d="M 0 0 L ${nX.toFixed(1)} ${nY.toFixed(1)} A ${rx} ${ry} 0 1 0 ${nX2.toFixed(1)} ${nY2.toFixed(1)} Z" fill="#82C99A"/>
+      <path d="M 0 0 L ${(nX * 0.96).toFixed(1)} ${(nY * 0.96).toFixed(1)} A ${(rx * 0.94).toFixed(1)} ${(ry * 0.94).toFixed(1)} 0 1 0 ${(nX2 * 0.96).toFixed(1)} ${(nY2 * 0.96).toFixed(1)} Z" fill="#95D5AA" opacity="0.65"/>
+      ${veins}
+      <ellipse cx="0" cy="0" rx="5.5" ry="2.2" fill="#D5F2DC"/>
+    </g>
+  `;
+}
+
+function renderCuppedLotusLeaf(stemX, baseY, topX, topY, rx = 46, ry = 18, tiltDeg = -8, scale = 1) {
+  const midX = (stemX + topX) * 0.5 + (stemX > topX ? -8 : 8);
+  const midY = (baseY + topY) * 0.55;
+  return `
+    <g>
+      <path d="M ${stemX} ${baseY} Q ${midX} ${midY} ${topX} ${topY}" fill="none" stroke="#5FA77A" stroke-width="${(3.8 * scale).toFixed(1)}" stroke-linecap="round"/>
+      <g transform="translate(${topX}, ${topY}) rotate(${tiltDeg}) scale(${scale})">
+        <path d="M ${-rx} 0 C ${-rx * 0.72} ${ry * 1.45}, ${rx * 0.72} ${ry * 1.45}, ${rx} 0 C ${rx * 0.5} ${ry * 0.75}, ${-rx * 0.5} ${ry * 0.75}, ${-rx} 0 Z" fill="#579F71"/>
+        <ellipse cx="0" cy="${-ry * 0.16}" rx="${rx}" ry="${ry}" fill="#85CC9D"/>
+        <path d="M ${-rx * 0.95} ${-ry * 0.12} Q ${-rx * 0.45} ${-ry * 1.1} 0 ${-ry * 0.75} Q ${rx * 0.48} ${-ry * 1.12} ${rx * 0.95} ${-ry * 0.12}" fill="none" stroke="#A7DFB9" stroke-width="1.6" stroke-linecap="round"/>
+        <path d="M 0 ${ry * 0.1} L ${-rx * 0.65} ${-ry * 0.45} M 0 ${ry * 0.1} L ${-rx * 0.25} ${-ry * 0.68} M 0 ${ry * 0.1} L ${rx * 0.28} ${-ry * 0.66} M 0 ${ry * 0.1} L ${rx * 0.68} ${-ry * 0.42}" stroke="#579F71" stroke-width="1.2" opacity="0.65" stroke-linecap="round"/>
+        <circle cx="0" cy="${ry * 0.1}" r="3.4" fill="#D5F2DC"/>
+      </g>
+    </g>
+  `;
+}
+
+function renderBotanicalLotusBud(stemX, baseY, tipX, tipY, scale = 1, tiltDeg = 0) {
+  const cX = (stemX + tipX) * 0.5 + (tipX - stemX) * 0.25;
+  const cY = (baseY + tipY) * 0.55;
+  return `
+    <g>
+      <path d="M ${stemX} ${baseY} Q ${cX} ${cY} ${tipX} ${tipY}" fill="none" stroke="#5FA77A" stroke-width="${(3.4 * scale).toFixed(1)}" stroke-linecap="round"/>
+      <g transform="translate(${tipX}, ${tipY}) rotate(${tiltDeg}) scale(${scale})">
+        <!-- Đài sen xanh non ôm sát gốc búp -->
+        <path d="M 0 2 C -12 0, -15 -14, -7 -24 C -2 -16, -2 -6, 0 2 Z" fill="#77B88A"/>
+        <path d="M 0 2 C 12 0, 15 -14, 7 -24 C 2 -16, 2 -6, 0 2 Z" fill="#68AA7C"/>
+        <!-- Lớp cánh ngoài hồng dịu -->
+        <path d="M 0 0 C -17 -6, -18 -30, 0 -42 C 18 -30, 17 -6, 0 0 Z" fill="#F6B8C6"/>
+        <!-- Hai cánh bên hé ôm -->
+        <path d="M -2 -1 C -15 -10, -12 -32, 0 -46 C -4 -26, -3 -10, -2 -1 Z" fill="#F08EA4"/>
+        <path d="M 2 -1 C 15 -10, 12 -32, 0 -46 C 4 -26, 3 -10, 2 -1 Z" fill="#E87A90"/>
+        <!-- Đỉnh búp sen chúm chím -->
+        <path d="M 0 -2 C -9 -14, -7 -36, 0 -50 C 7 -36, 9 -14, 0 -2 Z" fill="#F9D5DF"/>
+        <path d="M 0 -5 C -5 -16, -4 -35, 0 -49 C 4 -35, 5 -16, 0 -5 Z" fill="#E87A90" opacity="0.72"/>
+      </g>
+    </g>
+  `;
+}
+
+function renderBotanicalLotusFlower(stemX, baseY, cx, cy, scale = 1, tiltDeg = 0) {
+  const cX = (stemX + cx) * 0.5;
+  const cY = (baseY + cy) * 0.56;
+  return `
+    <g>
+      <path d="M ${stemX} ${baseY} Q ${cX} ${cY} ${cx} ${cy + 6}" fill="none" stroke="#5FA77A" stroke-width="${(3.8 * scale).toFixed(1)}" stroke-linecap="round"/>
+      <g transform="translate(${cx}, ${cy}) rotate(${tiltDeg}) scale(${scale})">
+        <!-- Đài xanh đáy hoa -->
+        <path d="M -14 4 Q 0 12 14 4 Q 0 2 -14 4 Z" fill="#6FB384"/>
+        <!-- Cánh ngoài xòe rộng -->
+        <path d="M -4 4 C -30 4, -38 -14, -28 -26 C -16 -18, -8 -6, -4 4 Z" fill="#F7C2CF"/>
+        <path d="M 4 4 C 30 4, 38 -14, 28 -26 C 16 -18, 8 -6, 4 4 Z" fill="#F29FB1"/>
+        <!-- Lớp cánh giữa -->
+        <path d="M -2 4 C -22 -2, -24 -28, -12 -38 C -4 -24, -2 -8, -2 4 Z" fill="#EE879E"/>
+        <path d="M 2 4 C 22 -2, 24 -28, 12 -38 C 4 -24, 2 -8, 2 4 Z" fill="#E26D87"/>
+        <!-- Gương nhụy sen vàng rực rỡ bên trong -->
+        <ellipse cx="0" cy="-18" rx="9.5" ry="5.5" fill="#F4C96B"/>
+        <circle cx="-4" cy="-18" r="1.2" fill="#C98C2B"/>
+        <circle cx="0" cy="-19" r="1.2" fill="#C98C2B"/>
+        <circle cx="4" cy="-18" r="1.2" fill="#C98C2B"/>
+        <!-- Cánh trung tâm trước -->
+        <path d="M 0 5 C -11 -4, -10 -28, 0 -42 C 10 -28, 11 -4, 0 5 Z" fill="#F8D2DC"/>
+        <path d="M 0 3 C -7 -6, -6 -25, 0 -38 C 6 -25, 7 -6, 0 3 Z" fill="#EA7B93" opacity="0.78"/>
+      </g>
+    </g>
+  `;
+}
+
 /**
- * Họa tiết Vườn Hoa Sen nền cho Cảnh 9 (Đội ngũ Giáo viên)
+ * Họa tiết Đầm Hoa Sen chân thực cho Cảnh 10 (Đội ngũ Giáo viên)
  */
 export function renderLotusGardenDecor(backHost, frontHost) {
   backHost.innerHTML = `
-  <svg viewBox="0 0 1200 160" preserveAspectRatio="none" aria-hidden="true">
-    <path d="M -20 145 Q 220 75 480 120 T 960 95 T 1220 135 L 1220 160 L -20 160 Z" fill="#E8F4EC" opacity="0.7"/>
-    <ellipse cx="145" cy="136" rx="68" ry="16" fill="#A6D9B8" opacity="0.62"/>
-    <ellipse cx="1055" cy="130" rx="74" ry="18" fill="#A6D9B8" opacity="0.58"/>
-    <path d="M 160 130 C 148 109 150 92 162 82 C 174 92 176 109 160 130 Z" fill="#F7C7D2"/>
-    <path d="M 1030 124 C 1018 104 1020 86 1032 76 C 1044 86 1046 104 1030 124 Z" fill="#F7C7D2"/>
+  <svg viewBox="0 0 1200 260" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+    <!-- Mặt nước đầm sen dịu mát hai bên -->
+    <ellipse cx="185" cy="212" rx="195" ry="34" fill="#CBE7D8" opacity="0.55"/>
+    <ellipse cx="1015" cy="212" rx="195" ry="34" fill="#CBE7D8" opacity="0.55"/>
+    <path d="M 60 226 Q 170 214 295 228" fill="none" stroke="#FFFDF9" stroke-width="2" opacity="0.65" stroke-linecap="round"/>
+    <path d="M 905 228 Q 1030 214 1140 226" fill="none" stroke="#FFFDF9" stroke-width="2" opacity="0.65" stroke-linecap="round"/>
+
+    <!-- Cụm đầm sen bên TRÁI: lá sen xòe, lá vươn cao, búp sen & hoa sen hé nở -->
+    ${renderPondLilyPad(136, 206, 62, 17, 1, 0.92)}
+    ${renderPondLilyPad(248, 220, 44, 13, -1, 0.85)}
+    ${renderCuppedLotusLeaf(102, 214, 72, 108, 48, 17, -9, 1)}
+    ${renderCuppedLotusLeaf(224, 218, 250, 140, 38, 14, 7, 0.86)}
+    ${renderBotanicalLotusFlower(168, 214, 154, 128, 0.95, -5)}
+    ${renderBotanicalLotusBud(204, 218, 212, 142, 0.9, 9)}
+    ${renderBotanicalLotusBud(120, 210, 108, 152, 0.72, -12)}
+
+    <!-- Cụm đầm sen bên PHẢI: lá sen xòe, lá vươn cao, búp sen & hoa sen hé nở -->
+    ${renderPondLilyPad(1064, 206, 62, 17, -1, 0.92)}
+    ${renderPondLilyPad(952, 220, 44, 13, 1, 0.85)}
+    ${renderCuppedLotusLeaf(1098, 214, 1128, 108, 48, 17, 9, 1)}
+    ${renderCuppedLotusLeaf(976, 218, 950, 140, 38, 14, -7, 0.86)}
+    ${renderBotanicalLotusFlower(1032, 214, 1046, 128, 0.95, 5)}
+    ${renderBotanicalLotusBud(996, 218, 988, 142, 0.9, -9)}
+    ${renderBotanicalLotusBud(1080, 210, 1092, 152, 0.72, 12)}
   </svg>
   `;
 
   frontHost.innerHTML = `
-  <svg viewBox="0 0 1200 95" preserveAspectRatio="none" aria-hidden="true">
-    <ellipse cx="195" cy="68" rx="85" ry="18" fill="#77C696" opacity="0.34"/>
-    <ellipse cx="995" cy="64" rx="92" ry="20" fill="#77C696" opacity="0.32"/>
+  <svg viewBox="0 0 1200 120" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+    <ellipse cx="600" cy="108" rx="460" ry="18" fill="#BCE1CE" opacity="0.28"/>
+    ${renderPondLilyPad(306, 94, 48, 12, 1, 0.55)}
+    ${renderPondLilyPad(894, 94, 48, 12, -1, 0.55)}
   </svg>
   `;
 }

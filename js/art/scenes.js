@@ -169,6 +169,33 @@ function renderIronFenceAlongV(u, startV, endV, z0 = 145, h = 34, step = 28) {
 }
 
 /**
+ * Hàng rào sắt thấp nhiều màu sắc rực rỡ phía trước các lớp học (chừa khoảng cửa ra vào)
+ */
+function renderColorfulClassroomRail(uStart, uEnd, v, z0 = 2, h = 24, step = 18, doorGap = null) {
+  const colors = ["#E87A90", "#F4C96B", "#52A877", "#389FAD", "#A68AD9", "#F28C6A"];
+  const spans = doorGap ? [[uStart, doorGap[0]], [doorGap[1], uEnd]] : [[uStart, uEnd]];
+  let html = "";
+  spans.forEach(([s, e]) => {
+    if (e - s < 10) return;
+    const count = Math.max(1, Math.floor((e - s) / step));
+    for (let i = 0; i <= count; i++) {
+      const u = Math.min(e, s + i * step);
+      const [bx, by] = iso(u, v, z0);
+      const [tx, ty] = iso(u, v, z0 + h);
+      const col = colors[i % colors.length];
+      html += `<line x1="${bx}" y1="${by}" x2="${tx}" y2="${ty}" stroke="${col}" stroke-width="2.4" stroke-linecap="round"/>`;
+    }
+    const [tx1, ty1] = iso(s, v, z0 + h);
+    const [tx2, ty2] = iso(e, v, z0 + h);
+    const [mx1, my1] = iso(s, v, z0 + 7);
+    const [mx2, my2] = iso(e, v, z0 + 7);
+    html += `<line x1="${mx1}" y1="${my1}" x2="${mx2}" y2="${my2}" stroke="#4E7C87" stroke-width="1.8" stroke-linecap="round"/>`;
+    html += `<line x1="${tx1}" y1="${ty1}" x2="${tx2}" y2="${ty2}" stroke="#389FAD" stroke-width="3.2" stroke-linecap="round"/>`;
+  });
+  return `<g class="classroom-color-rail">${html}</g>`;
+}
+
+/**
  * Cánh cổng 30° Flat Isometric (vẽ chuẩn hệ tọa độ iso(u,v,z) để trượt đúng theo 2 trụ)
  */
 function renderIsoGateWing(startU, endU, v, zBottom = 2, zTop = 98) {
@@ -308,6 +335,7 @@ export function renderCampusScene(hostEl) {
     <!-- LỚP 2: SƠ ĐỒ BẢN ĐỒ TỔNG THỂ FLAT ISOMETRIC 30° -->
     <g id="layer-midground" class="parallax-layer-mid">
 
+      <g id="ground-stage-group">
       <!-- ĐẾ ĐẢO KHUÔN VIÊN & CON ĐƯỜNG RỘNG CHIA LÀN TRƯỚC CỔNG -->
       <g id="campus-base-island" filter="url(#paperShadow)">
         ${isoBox(-40, -240, 2060, 1020, -38, 38, "#F4EDE2", "#E4D8C7", "#D5C6B2")}
@@ -445,9 +473,17 @@ export function renderCampusScene(hostEl) {
           </g>
         </g>
 
-        <!-- 2. LỚP NHÀ TRẺ (5 – 36 THÁNG) — NGĂN NẮP VỚI GIƯỜNG NGỦ NỆM, THẢM CHƠI & KỆ ĐỒ CHƠI -->
+        <!-- TƯỜNG HẬU LIỀN MẠCH TOÀN DÃY PHÒNG TẦNG TRỆT (u = 440 .. 1920, v = 340..354) -->
+        <g id="ground-shared-back-wall">
+          ${isoBox(440, 340, 1480, 14, 2, 54, "#FFFDF9", "#F2EAE0", "#E5DACB")}
+        </g>
+
+        <!-- 2. LỚP NHÀ TRẺ (5 – 36 THÁNG) — SÀN, TƯỜNG NGĂN LIỀN MẠCH & HÀNG RÀO SẮT MÀU THẤP PHÍA TRƯỚC -->
         <g id="room-nha-tre">
-          ${isoCutawayRoom(440, 340, 280, 260, 2, 54, "#FFF7F8", "#FCE6EA", "#F3D3DA", "#FFFDF9")}
+          ${isoFloor(440, 354, 280, 246, 2, "#FFF7F8")}
+          <!-- Tường trái giáp Sân chơi chính nối khít tường hậu -->
+          ${isoBox(440, 354, 14, 246, 2, 54, "#FFFDF9", "#F2EAE0", "#E5DACB")}
+          ${isoFloor(440, 342, 14, 18, 56, "#FFFDF9")}
           <ellipse id="lamp-nt-cone" cx="${iso(580, 470, 5)[0]}" cy="${iso(580, 470, 5)[1]}" rx="115" ry="66" fill="url(#lampSpotGrad)" opacity="0.25"/>
           <!-- Dãy nệm ngủ pastel + gối gọn gàng dọc tường sau -->
           ${isoBox(468, 366, 72, 38, 4, 10, "#FFFDF9", "#F3E6E8", "#E6D5D8")}
@@ -462,22 +498,26 @@ export function renderCampusScene(hostEl) {
           ${isoFloor(506, 500, 64, 64, 4, "#FFE79E")}
           ${isoFloor(574, 500, 64, 64, 4, "#C4E8D1")}
           <!-- Kệ đồ chơi khối mềm góc trái & bàn pha sữa bên phải -->
-          ${isoBox(460, 456, 26, 92, 4, 28, "#F5DEBE", "#E3C59B", "#D0B084")}
-          ${isoBox(464, 466, 16, 18, 32, 12, "#E87A90", "#CE6278", "#B64F64")}
-          ${isoBox(464, 496, 16, 18, 32, 12, "#4EB3C1", "#389FAD", "#2B8491")}
+          ${isoBox(462, 456, 26, 92, 4, 28, "#F5DEBE", "#E3C59B", "#D0B084")}
+          ${isoBox(466, 466, 16, 18, 32, 12, "#E87A90", "#CE6278", "#B64F64")}
+          ${isoBox(466, 496, 16, 18, 32, 12, "#4EB3C1", "#389FAD", "#2B8491")}
           ${isoBox(656, 514, 42, 42, 4, 22, "#F4A3B4", "#E28B9E", "#CC7589")}
           ${isoBox(668, 526, 16, 16, 26, 10, "#FFFDF9", "#BCE5EB", "#96CDD6")}
+          <!-- Hàng rào sắt thấp rực rỡ phía trước Lớp Nhà trẻ (chừa lối vào bên phải) -->
+          ${renderColorfulClassroomRail(456, 718, 598, 2, 24, 18, [652, 712])}
         </g>
 
-        <!-- 3. LỚP MẪU GIÁO BÉ (3 – 4 TUỔI) — BẢNG HOA BÉ NGOAN, TỦ BA LÔ & 2 CỤM BÀN GHẾ -->
+        <!-- 3. LỚP MẪU GIÁO BÉ (3 – 4 TUỔI) — TƯỜNG NGĂN LIỀN MẠCH & HÀNG RÀO SẮT MÀU THẤP PHÍA TRƯỚC -->
         <g id="room-mau-giao-be">
-          ${isoCutawayRoom(720, 340, 280, 260, 2, 54, "#F5FBF7", "#E4F2E9", "#D3E8DA", "#FFFDF9")}
+          ${isoFloor(720, 354, 280, 246, 2, "#F5FBF7")}
+          ${isoBox(720, 354, 14, 246, 2, 54, "#FFFDF9", "#F2EAE0", "#E5DACB")}
+          ${isoFloor(720, 342, 14, 18, 56, "#FFFDF9")}
           <ellipse id="lamp-mgb-cone" cx="${iso(860, 470, 5)[0]}" cy="${iso(860, 470, 5)[1]}" rx="115" ry="66" fill="url(#lampSpotGrad)" opacity="0.25"/>
           <!-- Bảng Hoa Bé Ngoan treo tường sau -->
-          ${isoBox(794, 346, 120, 8, 18, 30, "#FFFDF9", "#E87A90", "#D16379")}
-          ${isoFloor(812, 355, 22, 2, 34, "#F4C96B")}
-          ${isoFloor(844, 355, 22, 2, 34, "#BCE5EB")}
-          ${isoFloor(876, 355, 22, 2, 34, "#C4E8D1")}
+          ${isoBox(794, 354, 120, 8, 18, 30, "#FFFDF9", "#E87A90", "#D16379")}
+          ${isoFloor(812, 363, 22, 2, 34, "#F4C96B")}
+          ${isoFloor(844, 363, 22, 2, 34, "#BCE5EB")}
+          ${isoFloor(876, 363, 22, 2, 34, "#C4E8D1")}
           <!-- Tủ để ba lô & xếp dép dọc tường trái -->
           ${isoBox(740, 380, 32, 118, 4, 30, "#F5DEBE", "#E3C59B", "#D0B084")}
           ${isoBox(746, 392, 18, 20, 34, 14, "#E87A90", "#CE6278", "#B64F64")}
@@ -486,17 +526,21 @@ export function renderCampusScene(hostEl) {
           <!-- 2 cụm bàn học mầm non kèm ghế 4 phía gọn gàng -->
           ${isoMiniTable(835, 428, 4, "#FFE599", "#E87A90", "#52A877")}
           ${isoMiniTable(895, 506, 4, "#4EB3C1", "#F4C96B", "#E87A90")}
+          <!-- Hàng rào sắt thấp rực rỡ phía trước Lớp Mẫu giáo bé (chừa lối vào bên phải) -->
+          ${renderColorfulClassroomRail(736, 998, 598, 2, 24, 18, [932, 992])}
         </g>
 
         <!-- 4. VĂN PHÒNG & CAMERA GIÁM SÁT 24/7 -->
         <g id="room-van-phong">
-          ${isoCutawayRoom(1000, 340, 240, 260, 2, 54, "#FFFDF8", "#F4ECE0", "#E8DDD0", "#FFFDF9")}
+          ${isoFloor(1000, 354, 240, 246, 2, "#FFFDF8")}
+          ${isoBox(1000, 354, 14, 246, 2, 54, "#FFFDF9", "#F2EAE0", "#E5DACB")}
+          ${isoFloor(1000, 342, 14, 18, 56, "#FFFDF9")}
           <g id="office-cctv-camera">
-            ${isoBox(1180, 346, 26, 18, 42, 16, "#FFFDF9", "#389FAD", "#297E8A")}
-            <circle cx="${iso(1193, 362, 48)[0]}" cy="${iso(1193, 362, 48)[1]}" r="5" fill="#52A877"/>
+            ${isoBox(1180, 354, 26, 18, 42, 16, "#FFFDF9", "#389FAD", "#297E8A")}
+            <circle cx="${iso(1193, 370, 48)[0]}" cy="${iso(1193, 370, 48)[1]}" r="5" fill="#52A877"/>
           </g>
           <!-- Tủ hồ sơ sau bàn làm việc -->
-          ${isoBox(1025, 362, 92, 26, 4, 38, "#EFE3D3", "#DFCEBA", "#CEB9A2")}
+          ${isoBox(1025, 368, 92, 26, 4, 38, "#EFE3D3", "#DFCEBA", "#CEB9A2")}
           <!-- Bàn làm việc & màn hình camera giám sát 24/7 -->
           ${isoBox(1062, 420, 118, 58, 20, 10, "#DFBE97", "#C79E6E", "#B28758")}
           ${isoBox(1070, 426, 102, 46, 2, 18, "#EBD6BA", "#D5BA96", "#C0A27D")}
@@ -506,87 +550,132 @@ export function renderCampusScene(hostEl) {
           ${isoBox(1188, 434, 18, 18, 30, 16, "#F7D1DA", "#E87A90", "#C95E75")}
           <!-- Ghế tiếp phụ huynh phía trước -->
           ${isoBox(1096, 514, 24, 24, 4, 16, "#4EB3C1", "#389FAD", "#2B8491")}
+          <!-- Tường ngăn bên phải Văn phòng sát khu cầu thang -->
+          ${isoBox(1228, 354, 14, 246, 2, 54, "#FFFDF9", "#F2EAE0", "#E5DACB")}
+          ${isoFloor(1228, 342, 14, 18, 56, "#FFFDF9")}
         </g>
 
-        <!-- 5. CẦU THANG LÊN LẦU 2 (VẼ TỪ SAU RA TRƯỚC VỚI BẬC GỖ KEM & TAY VỊN ĐÔI CHUẨN CHIỀU CẦU THANG) -->
+        <!-- 5. CẦU THANG CHỮ U LƠ LỬNG BẬC MỎNG, KHÔNG CHÂN ĐẾ, LAN CAN CẢ 2 BÊN -->
         <g id="room-cau-thang">
           ${(() => {
             let steps = "";
-            const stepCount = 11;
-            const totalV = 410; // Chân cầu thang ngang mặt trước phòng (v=600) -> mép hành lang Lầu 2 (v=190)
-            const dv = totalV / stepCount;
-            const dz = 144 / stepCount;
+            const railCols = ["#E87A90", "#F4C96B", "#52A877", "#389FAD"];
+            const slabThick = 6.5;
 
-            // Dầm nghiêng đỡ dưới thân cầu thang ở cạnh phải (không răng cưa)
-            steps += `<polygon points="${pts([
-              iso(1368, 600, 2),
-              iso(1368, 190, 144),
-              iso(1368, 190, 2),
-            ])}" fill="#B9C7D0" stroke="#B9C7D0" stroke-width="1"/>`;
+            // 1) Lan can phía sau chiếu nghỉ (trải từ u=1255 sang u=1365)
+            for (let u = 1255; u <= 1365; u += 27.5) {
+              steps += isoBox(u, 363, 3.5, 3.5, 74, 22, "#4EB3C1", "#389FAD", "#297E8A");
+            }
+            const [rl1x, rl1y] = iso(1257, 365, 96);
+            const [rl2x, rl2y] = iso(1367, 365, 96);
+            steps += `<line x1="${rl1x}" y1="${rl1y}" x2="${rl2x}" y2="${rl2y}" stroke="#389FAD" stroke-width="3.6" stroke-linecap="round"/>`;
 
-            // Vẽ từng bậc từ trên cao (s = stepCount - 1) xuống chân (s = 0) để đúng chiều sâu Isometric
-            for (let s = stepCount - 1; s >= 0; s--) {
-              const vs = 600 - (s + 1) * dv;
-              const zs = s * dz;
-              const zTop = zs + dz;
-              const zBase = Math.max(2, zs - 4);
-              // Thân bậc (mặt đứng xám xanh dịu, mặt bậc gỗ kem sáng)
-              steps += isoBox(1248, vs, 120, dv + 2, zBase, zTop - zBase, "#FFF6E8", "#D0DCE3", "#BAC9D2");
-              // Mũi bậc sáng nhẹ tạo từng bậc tách bạch rõ nét
-              steps += isoBox(1248, vs + dv - 3, 120, 5, zTop - 3, 3.5, "#FFFDF9", "#E7D9C6", "#D6C5B0");
+            // 2) Tấm chiếu nghỉ mỏng lơ lửng phía sau (z = 67.5..74, không bệ đỡ dưới)
+            steps += isoBox(1254, 362, 112, 52, 74 - slabThick, slabThick, "#FFFDF9", "#D8E2E8", "#C3D0D8");
+
+            // 3) Vế lên 2 bên trái (u=1254..1304, v=414->584, z=74->144) — lan can CẢ 2 BÊN & bậc mỏng lơ lửng
+            // 3a) Lan can bên trái (cạnh xa u=1255)
+            for (let r = 0; r < 4; r++) {
+              const vr2 = 426 + r * 48;
+              const zr2 = 84 + r * 19;
+              steps += isoBox(1255, vr2, 3.5, 3.5, zr2, 22, railCols[r], railCols[r], railCols[r]);
+            }
+            const [f2Lx1, f2Ly1] = iso(1257, 426, 106);
+            const [f2Lx2, f2Ly2] = iso(1257, 570, 163);
+            steps += `<line x1="${f2Lx1}" y1="${f2Ly1}" x2="${f2Lx2}" y2="${f2Ly2}" stroke="#E87A90" stroke-width="3.8" stroke-linecap="round"/>`;
+
+            // 3b) 6 bậc thang mỏng lơ lửng của vế 2 (quay ra đối diện hành lang dưới)
+            const n2 = 6;
+            const dv2 = 170 / n2;
+            const dz2 = 70 / n2;
+            for (let s = 0; s < n2; s++) {
+              const vs = 414 + s * dv2;
+              const zTop = 74 + (s + 1) * dz2;
+              steps += isoBox(1254, vs, 50, dv2 - 1, zTop - slabThick, slabThick, "#FFFDF9", "#D8E2E8", "#C3D0D8");
             }
 
-            // Hai bên tay vịn nhiều màu (cạnh trái u=1252 & cạnh phải u=1364)
-            const railPalette = ["#E87A90", "#F4C96B", "#52A877", "#389FAD", "#A68AD9", "#F08CA0"];
-            for (let r = 5; r >= 0; r--) {
-              const vr = 582 - r * 74;
-              const zr = 14 + r * 24;
-              steps += isoBox(1362, vr, 6, 6, zr, 28, railPalette[r], railPalette[r], railPalette[r]);
+            // 3c) Lan can bên phải của vế 2 (cạnh giữa u=1301)
+            for (let r = 0; r < 4; r++) {
+              const vr2 = 426 + r * 48;
+              const zr2 = 84 + r * 19;
+              steps += isoBox(1301, vr2, 3.5, 3.5, zr2, 22, railCols[r], railCols[r], railCols[r]);
             }
-            const [rxR1, ryR1] = iso(1365, 582, 42);
-            const [rxR2, ryR2] = iso(1365, 200, 168);
-            steps += `<line x1="${rxR1}" y1="${ryR1}" x2="${rxR2}" y2="${ryR2}" stroke="#389FAD" stroke-width="5" stroke-linecap="round"/>`;
+            const [f2Rx1, f2Ry1] = iso(1303, 426, 106);
+            const [f2Rx2, f2Ry2] = iso(1303, 570, 163);
+            steps += `<line x1="${f2Rx1}" y1="${f2Ry1}" x2="${f2Rx2}" y2="${f2Ry2}" stroke="#E87A90" stroke-width="3.8" stroke-linecap="round"/>`;
 
-            for (let r = 5; r >= 0; r--) {
-              const vr = 582 - r * 74;
-              const zr = 14 + r * 24;
-              steps += isoBox(1250, vr, 6, 6, zr, 28, railPalette[r], railPalette[r], railPalette[r]);
+            // 4) Vế lên 1 bên phải (u=1316..1366, v=584->414, z=12->74) — lan can CẢ 2 BÊN & bậc mỏng lơ lửng
+            // 4a) Lan can bên trái của vế 1 (cạnh giữa u=1317)
+            for (let r = 0; r < 4; r++) {
+              const vr1 = 572 - r * 48;
+              const zr1 = 14 + r * 19;
+              steps += isoBox(1317, vr1, 3.5, 3.5, zr1, 22, railCols[3 - r], railCols[3 - r], railCols[3 - r]);
             }
-            const [rxL1, ryL1] = iso(1253, 582, 42);
-            const [rxL2, ryL2] = iso(1253, 200, 168);
-            steps += `<line x1="${rxL1}" y1="${ryL1}" x2="${rxL2}" y2="${ryL2}" stroke="#389FAD" stroke-width="5.5" stroke-linecap="round"/>`;
+            const [f1Lx1, f1Ly1] = iso(1319, 572, 36);
+            const [f1Lx2, f1Ly2] = iso(1319, 428, 93);
+            steps += `<line x1="${f1Lx1}" y1="${f1Ly1}" x2="${f1Lx2}" y2="${f1Ly2}" stroke="#389FAD" stroke-width="3.8" stroke-linecap="round"/>`;
+
+            // 4b) 6 bậc thang mỏng lơ lửng của vế 1
+            const n1 = 6;
+            const dv1 = 170 / n1;
+            const dz1 = 70 / n1;
+            for (let s = n1 - 1; s >= 0; s--) {
+              const vs = 584 - (s + 1) * dv1;
+              const zTop = 4 + (s + 1) * dz1;
+              steps += isoBox(1316, vs, 50, dv1 - 1, zTop - slabThick, slabThick, "#FFFDF9", "#D8E2E8", "#C3D0D8");
+            }
+
+            // 4c) Lan can bên phải của vế 1 (cạnh ngoài u=1363)
+            for (let r = 0; r < 4; r++) {
+              const vr1 = 572 - r * 48;
+              const zr1 = 14 + r * 19;
+              steps += isoBox(1363, vr1, 3.5, 3.5, zr1, 22, railCols[3 - r], railCols[3 - r], railCols[3 - r]);
+            }
+            const [f1Rx1, f1Ry1] = iso(1365, 572, 36);
+            const [f1Rx2, f1Ry2] = iso(1365, 428, 93);
+            steps += `<line x1="${f1Rx1}" y1="${f1Ry1}" x2="${f1Rx2}" y2="${f1Ry2}" stroke="#389FAD" stroke-width="3.8" stroke-linecap="round"/>`;
+
             return steps;
           })()}
         </g>
 
-        <!-- 6. KHO DỤNG CỤ + BẾP NẤU XOAY 90° HÌNH CHỮ L (CỬA HƯỚNG VỀ HÀNH LANG) -->
+        <!-- 6. KHO DỤNG CỤ (CÓ TƯỜNG TRƯỚC CHỪA CỬA BÊN PHẢI) + BẾP NẤU XOAY 90° HÌNH CHỮ L -->
         <g id="room-bep-kho">
-          <!-- Nền L-shape: nhánh Kho (1380..1680, v=340..600) + nhánh Bếp xoay 90° (1680..1920, v=340..724 sát hàng rào trước) -->
-          ${isoFloor(1380, 340, 300, 260, 2, "#FFFDF9")}
-          ${isoFloor(1680, 340, 240, 384, 2, "#FDF8F0")}
+          <!-- Nền L-shape: nhánh Kho (1380..1676, v=354..600) + nhánh Bếp xoay 90° (1676..1920, v=354..724) -->
+          ${isoFloor(1380, 354, 296, 246, 2, "#FFFDF9")}
+          ${isoFloor(1676, 354, 244, 370, 2, "#FDF8F0")}
 
-          <!-- Tường hậu chạy suốt sau Kho & Bếp (v=340) + tường trái sát cầu thang (u=1380) -->
-          ${isoBox(1380, 340, 540, 14, 2, 54, "#FFFDF9", "#F2EAE0", "#E5DACB")}
-          ${isoBox(1380, 340, 14, 260, 2, 54, "#FFFDF9", "#F2EAE0", "#E5DACB")}
-
-          <!-- Tường vách bếp phía hành lang (u=1680, v=600..724) với CỬA MỞ HƯỚNG VỀ HÀNH LANG -->
-          ${isoBox(1680, 600, 12, 26, 2, 46, "#FFFDF9", "#F2EAE0", "#E5DACB")}
-          ${isoBox(1680, 682, 12, 42, 2, 46, "#FFFDF9", "#F2EAE0", "#E5DACB")}
-          <!-- Thảm đón & cánh cửa Bếp mở hướng vào hành lang -->
-          ${isoFloor(1656, 628, 40, 52, 3, "#BCE5EB")}
-          ${isoBox(1690, 626, 36, 7, 3, 45, "#6EC2CE", "#389FAD", "#297E8A")}
-
-          <!-- Gờ thấp bao nét chữ L ngoài cùng bên phải & mặt trước gần hàng rào -->
-          ${isoBox(1908, 340, 12, 384, 2, 16, "#FFFDF9", "#EFE6DA", "#DDD1C1")}
-          ${isoBox(1680, 712, 240, 12, 2, 16, "#FFFDF9", "#EFE6DA", "#DDD1C1")}
+          <!-- Tường trái Kho giáp cầu thang nối liền mạch với tường hậu -->
+          ${isoBox(1380, 354, 14, 246, 2, 54, "#FFFDF9", "#F2EAE0", "#E5DACB")}
+          ${isoFloor(1380, 342, 14, 18, 56, "#FFFDF9")}
 
           <g id="area-kho-dung-cu">
-            ${isoBox(1414, 366, 138, 44, 4, 42, "#EFE3D3", "#DFCEBA", "#CEB9A2")}
-            ${isoBox(1422, 372, 34, 30, 46, 16, "#BCE5EB", "#96CDD6", "#7EB8C2")}
-            ${isoBox(1464, 372, 34, 30, 46, 14, "#F7D1DA", "#E6B4C0", "#D39CAC")}
-            ${isoBox(1506, 372, 34, 30, 46, 18, "#FFE79E", "#ECD07C", "#D4B662")}
+            ${isoBox(1414, 368, 138, 44, 4, 42, "#EFE3D3", "#DFCEBA", "#CEB9A2")}
+            ${isoBox(1422, 374, 34, 30, 46, 16, "#BCE5EB", "#96CDD6", "#7EB8C2")}
+            ${isoBox(1464, 374, 34, 30, 46, 14, "#F7D1DA", "#E6B4C0", "#D39CAC")}
+            ${isoBox(1506, 374, 34, 30, 46, 18, "#FFE79E", "#ECD07C", "#D4B662")}
             ${isoBox(1432, 470, 66, 46, 4, 20, "#F5DEBE", "#E3C59B", "#D0B084")}
           </g>
+
+          <!-- Bức tường phía trước Kho (u=1394..1612, v=588..602) CHỪA 1 CỬA RA VÀO BÊN PHẢI (u=1612..1676) -->
+          <g id="wall-kho-front">
+            ${isoBox(1394, 588, 218, 14, 2, 54, "#FFFDF9", "#F2EAE0", "#E5DACB")}
+            ${isoFloor(1380, 588, 18, 14, 56, "#FFFDF9")}
+            ${isoFloor(1614, 586, 60, 22, 3, "#FCE8D5")}
+          </g>
+
+          <!-- Bức tường ngăn cách liền mạch giữa Kho dụng cụ & Bếp nấu + vách cửa hướng ra hành lang -->
+          <g id="wall-kho-bep-divider">
+            ${isoBox(1676, 354, 14, 272, 2, 54, "#FFFDF9", "#F2EAE0", "#E5DACB")}
+            ${isoFloor(1676, 342, 14, 18, 56, "#FFFDF9")}
+            ${isoBox(1676, 682, 14, 42, 2, 54, "#FFFDF9", "#F2EAE0", "#E5DACB")}
+            ${isoFloor(1652, 628, 40, 52, 3, "#BCE5EB")}
+            ${isoBox(1690, 626, 36, 7, 3, 45, "#6EC2CE", "#389FAD", "#297E8A")}
+          </g>
+
+          <!-- Gờ thấp bao nét chữ L ngoài cùng bên phải & mặt trước gần hàng rào -->
+          ${isoBox(1906, 354, 14, 370, 2, 18, "#FFFDF9", "#EFE6DA", "#DDD1C1")}
+          ${isoBox(1676, 710, 244, 14, 2, 18, "#FFFDF9", "#EFE6DA", "#DDD1C1")}
 
           <g id="area-bep-nau">
             <!-- Bệ bếp dài xoay dọc theo trục V (từ cạnh sau v=375 ra gần hàng rào v=655) -->
@@ -618,10 +707,16 @@ export function renderCampusScene(hostEl) {
 
       <!-- HÀNG RÀO BÊN PHẢI TẦNG TRỆT (u = 1958, v = 310 .. 752) -->
       ${renderCementColorFenceAlongV(1958, 310, 17, 26, 40, 0)}
+      </g>
 
-      <!-- ==================== LẦU 2 (HÀNH LANG TRƯỚC NỐI 2 SÂN & HÀNG RÀO SẮT 3 CẠNH, KHÔNG CÂY) ==================== -->
+      <!-- ==================== LẦU 2 (HÀNH LANG TRƯỚC NỐI 2 SÂN & HÀNG RÀO SẮT BAO QUANH 4 MẶT GỒM SAU LƯNG, KHÔNG CÂY) ==================== -->
       <g id="floor-2-iso" filter="url(#paperShadow)">
         ${isoBox(580, -180, 1320, 376, 128, 16, "#F5EDE3", "#E2D4C4", "#CFC0AE")}
+
+        <!-- Hàng rào sắt phía sau lưng tầng trên (v=-174, u=584..1894) -->
+        <g id="floor2-iron-railings-back">
+          ${renderIronFenceAlongU(584, 1894, -174, 145, 34, 28)}
+        </g>
 
         <!-- Hành lang Lầu 2 chạy suốt phía trước các phòng nối liền 2 sân chơi hai đầu -->
         <g id="floor2-front-corridor">
@@ -638,7 +733,10 @@ export function renderCampusScene(hostEl) {
         </g>
 
         <g id="room-mau-giao-lon">
-          ${isoCutawayRoom(760, -172, 420, 284, 145, 52, "#FFFDF8", "#EFE4D6", "#E2D5C5", "#FFFDF9")}
+          ${isoFloor(760, -172, 420, 284, 145, "#FFFDF8")}
+          ${isoBox(760, -172, 420, 14, 145, 52, "#FFFDF9", "#EFE4D6", "#E2D5C5")}
+          ${isoBox(760, -158, 14, 270, 145, 52, "#FFFDF9", "#EFE4D6", "#E2D5C5")}
+          ${isoFloor(760, -168, 14, 18, 197, "#FFFDF9")}
           <ellipse id="lamp-mgl" cx="${iso(970, -30, 147)[0]}" cy="${iso(970, -30, 147)[1]}" rx="120" ry="68" fill="url(#lampSpotGrad)" opacity="0.25"/>
           <!-- Bảng chữ cái lớp 1 & kệ sách gọn gàng -->
           ${isoBox(895, -166, 148, 10, 162, 30, "#E4C193", "#3B8D70", "#2F755C")}
@@ -653,25 +751,46 @@ export function renderCampusScene(hostEl) {
           ${isoBox(1030, 5, 22, 22, 146, 12, "#E87A90", "#CE6278", "#B64F64")}
           ${isoBox(890, -86, 22, 22, 146, 12, "#52A877", "#3F8E61", "#31774F")}
           ${isoBox(1030, -86, 22, 22, 146, 12, "#F4C96B", "#DDA946", "#C79234")}
+          <!-- Bức tường bên phải liền mạch với tường hậu Lớp Mẫu giáo lớn -->
+          <g id="wall-mgl-right">
+            ${isoBox(1166, -158, 14, 270, 145, 52, "#FFFDF9", "#EFE4D6", "#E2D5C5")}
+            ${isoFloor(1166, -168, 14, 18, 197, "#FFFDF9")}
+          </g>
+          <!-- Hàng rào sắt thấp đủ màu sắc rực rỡ phía trước Lớp Mẫu giáo lớn -->
+          ${renderColorfulClassroomRail(776, 1164, 112, 145, 24, 18, [1096, 1160])}
         </g>
 
         <g id="room-loi-cau-thang-l2">
           ${isoFloor(1180, -172, 200, 284, 145, "#F6EFE7")}
-          ${isoBox(1196, -110, 164, 12, 146, 22, "#4EB3C1", "#389FAD", "#2B8491")}
-          ${isoBox(1210, -40, 62, 28, 146, 18, "#EFE3D3", "#DFCEBA", "#CEB9A2")}
+          ${isoBox(1196, -148, 164, 12, 146, 22, "#4EB3C1", "#389FAD", "#2B8491")}
+          <!-- Miệng ô cầu thang chữ U Lầu 2 (vế lên quay thẳng ra đối diện hành lang trước) -->
+          ${isoFloor(1252, -108, 116, 174, 146, "#D6E2E8")}
+          ${renderIronFenceAlongU(1252, 1368, -108, 146, 24, 24)}
+          ${renderIronFenceAlongV(1252, -108, 66, 146, 24, 24)}
+          ${renderIronFenceAlongV(1368, -108, 66, 146, 24, 24)}
         </g>
 
         <g id="room-mau-giao-nho">
-          ${isoCutawayRoom(1380, -172, 340, 284, 145, 52, "#FFF8FA", "#F8E3E8", "#ECD2D9", "#FFFDF9")}
+          ${isoFloor(1380, -172, 340, 284, 145, "#FFF8FA")}
+          ${isoBox(1380, -172, 340, 14, 145, 52, "#FFFDF9", "#F8E3E8", "#ECD2D9")}
+          ${isoBox(1380, -158, 14, 270, 145, 52, "#FFFDF9", "#F8E3E8", "#ECD2D9")}
+          ${isoFloor(1380, -168, 14, 18, 197, "#FFFDF9")}
           <ellipse id="lamp-mgn" cx="${iso(1550, -30, 147)[0]}" cy="${iso(1550, -30, 147)[1]}" rx="115" ry="66" fill="url(#lampSpotGrad)" opacity="0.25"/>
           <!-- Bảng trưng bày tranh, giá vẽ sáng tạo & bàn học nhóm -->
           ${isoBox(1425, -166, 112, 10, 162, 30, "#FFFDF9", "#E87A90", "#CE6278")}
-          ${isoBox(1640, -125, 36, 24, 146, 36, "#FFFDF9", "#D9A875", "#C2905D")}
-          ${isoBox(1646, -120, 22, 12, 182, 14, "#BCE5EB", "#96CDD6", "#7EB8C2")}
+          ${isoBox(1614, -125, 36, 24, 146, 36, "#FFFDF9", "#D9A875", "#C2905D")}
+          ${isoBox(1620, -120, 22, 12, 182, 14, "#BCE5EB", "#96CDD6", "#7EB8C2")}
           ${isoBox(1490, -55, 104, 64, 157, 10, "#6EC2CE", "#4CA6B3", "#38919E")}
           ${isoBox(1464, -36, 22, 22, 146, 12, "#F4C96B", "#DDA946", "#C79234")}
           ${isoBox(1604, -36, 22, 22, 146, 12, "#E87A90", "#CE6278", "#B64F64")}
           ${isoBox(1532, 16, 22, 22, 146, 12, "#52A877", "#3F8E61", "#31774F")}
+          <!-- Bức tường bên phải liền mạch với tường hậu Lớp Mẫu giáo nhỡ -->
+          <g id="wall-mgn-right">
+            ${isoBox(1706, -158, 14, 270, 145, 52, "#FFFDF9", "#F8E3E8", "#ECD2D9")}
+            ${isoFloor(1706, -168, 14, 18, 197, "#FFFDF9")}
+          </g>
+          <!-- Hàng rào sắt thấp đủ màu sắc rực rỡ phía trước Lớp Mẫu giáo nhỡ -->
+          ${renderColorfulClassroomRail(1396, 1704, 112, 145, 24, 18, [1396, 1454])}
         </g>
 
         <g id="room-san-nho-phai">
@@ -682,29 +801,29 @@ export function renderCampusScene(hostEl) {
           ${isoBox(1752, 24, 34, 34, 145, 14, "#F4C96B", "#DDA946", "#C79234")}
         </g>
 
-        <g id="floor2-front-trim">
-          ${isoPinkPillar(760, 114, 145, 62)}
-          ${isoPinkPillar(1176, 114, 145, 62)}
-          ${isoPinkPillar(1380, 114, 145, 62)}
-          ${isoPinkPillar(1716, 114, 145, 62)}
-          ${isoBox(760, 108, 416, 10, 198, 12, "#BCE5EB", "#2E97A6", "#257D8A")}
-          ${isoBox(1380, 108, 336, 10, 198, 12, "#BCE5EB", "#2E97A6", "#257D8A")}
-        </g>
-
-        <!-- Hàng rào sắt an toàn vây 3 cạnh Lầu 2 (Trái, Trước hành lang, Phải) -->
+        <!-- Hàng rào sắt an toàn vây khép kín Lầu 2 (Trái, Trước hành lang liền mạch, Phải) -->
         <g id="floor2-iron-railings">
           ${renderIronFenceAlongV(584, -174, 188, 145, 34, 28)}
-          ${renderIronFenceAlongU(584, 1246, 188, 145, 34, 28)}
-          ${renderIronFenceAlongU(1372, 1894, 188, 145, 34, 28)}
+          ${renderIronFenceAlongU(584, 1894, 188, 145, 34, 28)}
           ${renderIronFenceAlongV(1894, -174, 188, 145, 34, 28)}
         </g>
       </g>
 
       <!-- ================================================================= -->
-      <!-- MẶT TIỀN: HÀNG RÀO TRƯỚC KÉO DÀI HẾT CẤU TRÚC + CỔNG 30° + BẢNG 30° -->
+      <!-- MẶT TIỀN: 2 CÁNH CỔNG NẰM SAU HÀNG RÀO KHI KÉO RA + BẢNG 30° -->
       <!-- ================================================================= -->
       <g id="facade-curtain">
-        <!-- HÀNG RÀO XI MĂNG SƠN MÀU KÉO DÀI HẾT CẠNH TRƯỚC (u = -6 .. 1966) -->
+        <!-- HAI CÁNH CỔNG CHÍNH ISOMETRIC 30° (Đặt v=732 và vẽ TRƯỚC hàng rào để khi kéo ra lùi gọn phía sau hàng rào) -->
+        <g id="gate-doors-iso">
+          <g id="gate-leaf-left">
+            ${renderIsoGateWing(1040, 1122, 732, 2, 98)}
+          </g>
+          <g id="gate-leaf-right">
+            ${renderIsoGateWing(1122, 1204, 732, 2, 98)}
+          </g>
+        </g>
+
+        <!-- HÀNG RÀO XI MĂNG SƠN MÀU KÉO DÀI HẾT CẠNH TRƯỚC (u = -6 .. 1966) NẰM PHÍA TRƯỚC CÁNH CỔNG KÉO RA -->
         <g id="facade-outer-walls">
           ${renderCementColorFenceAlongU(-6, 750, 39, 26, 40, 0)}
           ${renderCementColorFenceAlongU(1240, 750, 28, 26, 40, 0)}
@@ -730,16 +849,6 @@ export function renderCampusScene(hostEl) {
               <rect x="18" y="35" width="60" height="34" rx="8" fill="#FFF4DC"/>
               <rect x="88" y="35" width="62" height="34" rx="8" fill="#EBF8FA"/>
             </g>
-          </g>
-        </g>
-
-        <!-- HAI CÁNH CỔNG CHÍNH ISOMETRIC 30° (Đẩy trượt về đúng 2 bên trụ khi mở!) -->
-        <g id="gate-doors-iso">
-          <g id="gate-leaf-left">
-            ${renderIsoGateWing(1040, 1122, 744, 2, 98)}
-          </g>
-          <g id="gate-leaf-right">
-            ${renderIsoGateWing(1122, 1204, 744, 2, 98)}
           </g>
         </g>
 
@@ -793,18 +902,22 @@ export function renderCampusScene(hostEl) {
     <!-- LỚP 3: NHÃN KHU VỰC (ICON TRÒN KHI CHƯA TỚI -> VIÊN NHỘNG TÊN ĐẦY ĐỦ KHI TỚI) -->
     <g id="layer-foreground">
       <g id="scene-room-badges">
-        ${renderIsoRoomLabel(240, 480, 148, "SÂN CHƠI CHÍNH", "#2D8E9B", "#FFFDF9", 206, "playground", "playground")}
-        ${renderIsoRoomLabel(580, 470, 96, "LỚP NHÀ TRẺ (5–36TH)", "#F4C96B", "#3D2A06", 242, "nursery", "baby")}
-        ${renderIsoRoomLabel(860, 470, 96, "LỚP MẪU GIÁO BÉ (3–4T)", "#E87A90", "#FFFDF9", 250, "preschool-small", "blocks")}
-        ${renderIsoRoomLabel(1120, 470, 96, "VĂN PHÒNG • CAMERA 24/7", "#389FAD", "#FFFDF9", 264, "veranda-kitchen", "camera")}
-        ${renderIsoRoomLabel(1310, 395, 132, "CẦU THANG LẦU 2", "#6F635B", "#FFFDF9", 198, "stairs", "stairs")}
-        ${renderIsoRoomLabel(1515, 470, 92, "KHO DỤNG CỤ", "#C8955A", "#FFFDF9", 176, "veranda-kitchen", "box")}
-        ${renderIsoRoomLabel(1805, 535, 92, "BẾP NẤU", "#E07A5F", "#FFFDF9", 148, "veranda-kitchen", "pot")}
+        <g id="ground-room-badges">
+          ${renderIsoRoomLabel(240, 480, 148, "SÂN CHƠI CHÍNH", "#2D8E9B", "#FFFDF9", 206, "playground", "playground")}
+          ${renderIsoRoomLabel(580, 470, 96, "LỚP NHÀ TRẺ (5–36TH)", "#F4C96B", "#3D2A06", 242, "nursery", "baby")}
+          ${renderIsoRoomLabel(860, 470, 96, "LỚP MẪU GIÁO BÉ (3–4T)", "#E87A90", "#FFFDF9", 250, "preschool-small", "blocks")}
+          ${renderIsoRoomLabel(1120, 470, 96, "VĂN PHÒNG • CAMERA 24/7", "#389FAD", "#FFFDF9", 264, "veranda-kitchen", "camera")}
+          ${renderIsoRoomLabel(1310, 480, 122, "CẦU THANG LẦU 2", "#6F635B", "#FFFDF9", 198, "stairs", "stairs")}
+          ${renderIsoRoomLabel(1515, 470, 92, "KHO DỤNG CỤ", "#C8955A", "#FFFDF9", 176, "veranda-kitchen", "box")}
+          ${renderIsoRoomLabel(1805, 535, 92, "BẾP NẤU", "#E07A5F", "#FFFDF9", 148, "veranda-kitchen", "pot")}
+        </g>
 
-        ${renderIsoRoomLabel(670, -30, 224, "SÂN CHƠI NHỎ TRÁI", "#52A877", "#FFFDF9", 214, "floor2-lon", "leaf")}
-        ${renderIsoRoomLabel(970, -30, 232, "LỚP MẪU GIÁO LỚN (5–6T)", "#D95D78", "#FFFDF9", 260, "floor2-lon", "book")}
-        ${renderIsoRoomLabel(1550, -30, 232, "LỚP MẪU GIÁO NHỠ (4–5T)", "#F4C96B", "#3D2A06", 260, "floor2-nho", "palette")}
-        ${renderIsoRoomLabel(1810, -30, 224, "SÂN CHƠI NHỎ PHẢI", "#389FAD", "#FFFDF9", 214, "floor2-nho", "leaf")}
+        <g id="floor2-room-badges">
+          ${renderIsoRoomLabel(670, -30, 224, "SÂN CHƠI NHỎ TRÁI", "#52A877", "#FFFDF9", 214, "floor2-lon", "leaf")}
+          ${renderIsoRoomLabel(970, -30, 232, "LỚP MẪU GIÁO LỚN (5–6T)", "#D95D78", "#FFFDF9", 260, "floor2-lon", "book")}
+          ${renderIsoRoomLabel(1550, -30, 232, "LỚP MẪU GIÁO NHỠ (4–5T)", "#F4C96B", "#3D2A06", 260, "floor2-nho", "palette")}
+          ${renderIsoRoomLabel(1810, -30, 224, "SÂN CHƠI NHỎ PHẢI", "#389FAD", "#FFFDF9", 214, "floor2-nho", "leaf")}
+        </g>
       </g>
     </g>
   </svg>

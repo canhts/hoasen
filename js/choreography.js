@@ -106,7 +106,11 @@ export function initChoreography({ data, onChapterChange }) {
   const svgLayerHost = document.getElementById("svg-scene-host");
   const svgGuideHost = document.getElementById("svg-guide-host");
   const skyLayer = document.getElementById("layer-sky");
+  const groundStageGroup = document.getElementById("ground-stage-group");
   const facadeCurtain = document.getElementById("facade-curtain");
+  const floor2Iso = document.getElementById("floor-2-iso");
+  const floor2Badges = document.getElementById("floor2-room-badges");
+  const groundBadges = document.getElementById("ground-room-badges");
   const gateLeafLeft = document.getElementById("gate-leaf-left");
   const gateLeafRight = document.getElementById("gate-leaf-right");
   const storyPath = document.getElementById("campus-story-path");
@@ -197,12 +201,25 @@ export function initChoreography({ data, onChapterChange }) {
   };
 
   let pathLength = 0;
+  let stopRatios = [0, 0.16, 0.34, 0.44, 0.54, 0.68, 0.85, 1];
   if (storyPath && typeof storyPath.getTotalLength === "function") {
     pathLength = storyPath.getTotalLength();
-    gsap.set(storyPath, {
-      strokeDasharray: pathLength,
-      strokeDashoffset: prefersReducedMotion ? 0 : pathLength,
-    });
+    const rawRatios = storyPath.getAttribute("data-stop-ratios");
+    if (rawRatios) {
+      try {
+        const parsed = JSON.parse(rawRatios);
+        if (Array.isArray(parsed) && parsed.length === 8) stopRatios = parsed;
+      } catch {}
+    }
+  }
+
+  function applyCursorRatio(ratio) {
+    if (!storyPath || pathLength <= 0) return;
+    const clamped = Math.max(0, Math.min(1, ratio));
+    if (floatingLotus) {
+      const pt = storyPath.getPointAtLength(clamped * pathLength);
+      floatingLotus.setAttribute("transform", `translate(${pt.x.toFixed(1)}, ${pt.y.toFixed(1)})`);
+    }
   }
 
   const chGate = data.chapters.find((c) => c.id === "gate");
@@ -254,8 +271,11 @@ export function initChoreography({ data, onChapterChange }) {
     gsap.set(stageCanvas, { autoAlpha: 1, scale: 1 });
     gsap.set([gateLeafLeft, gateLeafRight], { x: 0, y: 0, autoAlpha: 1 });
     if (facadeCurtain) gsap.set(facadeCurtain, { opacity: 1 });
+    if (floor2Iso || floor2Badges) gsap.set([floor2Iso, floor2Badges].filter(Boolean), { x: 0, y: 0 });
     currentBadgeStep = null;
     setActiveRoomBadges("gate", true);
+    const cursorState = { ratio: 0 };
+    applyCursorRatio(prefersReducedMotion ? 1 : 0);
 
     // Ẩn tất cả thẻ trừ thẻ đầu tiên
     Object.entries(cardsMap).forEach(([k, el]) => {
@@ -273,6 +293,8 @@ export function initChoreography({ data, onChapterChange }) {
       pointerEvents: "none",
     });
     if (epilogueVineLayer) gsap.set(epilogueVineLayer, { autoAlpha: 0 });
+    if (groundBadges) gsap.set(groundBadges, { autoAlpha: 1 });
+    if (groundStageGroup) gsap.set(groundStageGroup, { opacity: 1 });
     if (skyBackdrop) {
       gsap.set(skyBackdrop, {
         background: "linear-gradient(180deg, #FCF9F4 0%, #FBF3E7 58%, #F5EBDE 100%)",
@@ -297,6 +319,16 @@ export function initChoreography({ data, onChapterChange }) {
               gsap.set(gateLeafLeft, { x: open ? -92 * COS30 : 0, y: open ? -92 * SIN30 : 0 });
               gsap.set(gateLeafRight, { x: open ? 92 * COS30 : 0, y: open ? 92 * SIN30 : 0 });
               if (facadeCurtain) gsap.set(facadeCurtain, { opacity: open ? 0.3 : 1 });
+              const onFloor2 = stepKey === "floor2-nho" || stepKey === "floor2-lon";
+              if (floor2Iso || floor2Badges) {
+                gsap.set([floor2Iso, floor2Badges].filter(Boolean), {
+                  x: onFloor2 ? -520 * COS30 : 0,
+                  y: onFloor2 ? 520 * SIN30 : 0,
+                });
+              }
+              if (groundBadges) gsap.set(groundBadges, { autoAlpha: onFloor2 ? 0 : 1 });
+              if (groundStageGroup) gsap.set(groundStageGroup, { opacity: onFloor2 ? 0.3 : 1 });
+              applyCursorRatio(stopRatios[Math.min(idx, stopRatios.length - 1)]);
             }
             Object.entries(cardsMap).forEach(([k, el]) => {
               if (!el) return;
@@ -318,32 +350,28 @@ export function initChoreography({ data, onChapterChange }) {
     // MỘT TIMELINE DUY NHẤT ĐỒNG BỘ TOÀN BỘ 11 ĐIỂM DỪNG (0 -> 10)
     // Mỗi đoạn có nhịp chuyển (0.55) và nhịp dừng đọc êm (0.45)
     const master = gsap.timeline({
+      onUpdate: () => applyCursorRatio(cursorState.ratio),
       scrollTrigger: {
         trigger: "#master-scroll-track",
         start: "top top",
         end: "bottom bottom",
         scrub: 0.75,
         invalidateOnRefresh: true,
-        onUpdate: (self) => {
-          const p = self.progress;
-          // Đường nét dẫn chuyện đi hết ở 70% hành trình (khi kết thúc Lầu 2)
-          const campusP = Math.min(1, p / 0.72);
-          if (storyPath && pathLength > 0) {
-            storyPath.style.strokeDashoffset = `${pathLength * (1 - campusP)}`;
-            if (floatingLotus) {
-              const pt = storyPath.getPointAtLength(campusP * pathLength);
-              floatingLotus.setAttribute("transform", `translate(${pt.x.toFixed(1)}, ${pt.y.toFixed(1)})`);
-            }
-          }
-        },
       },
     });
 
-    // Bước 0 -> 7: Di chuyển bản đồ Isometric & crossfade thẻ tại chỗ
+    // Bước 0 -> 7: Di chuyển bản đồ Isometric, con trỏ đồng bộ chính xác từng chặng & crossfade thẻ tại chỗ
     for (let i = 0; i < stops.length - 1; i++) {
       const from = stops[i];
       const to = stops[i + 1];
       const tStart = i + 0.35; // Cho phép người dùng đứng đọc ở bước i trước khi chuyển sang i+1
+
+      // Con trỏ hành trình đi từ đúng mốc dừng chặng i sang đúng mốc dừng chặng i+1
+      master.to(
+        cursorState,
+        { ratio: stopRatios[i + 1], duration: 0.65, ease: "power1.inOut" },
+        tStart
+      );
 
       // Camera trượt mượt
       master.to(
@@ -404,6 +432,26 @@ export function initChoreography({ data, onChapterChange }) {
             { opacity: 0.3, duration: 0.36, ease: "power1.inOut" },
             tStart + 0.08
           );
+        }
+      }
+
+      // CHẶNG 6 (Cầu thang chữ U) -> CHẶNG 7 (Lầu 2):
+      // Toàn bộ Lầu 2 trượt ra phía trước (+520 theo trục V) ngang hàng khít với tầng trệt!
+      // Khi cuộn xuống lại trệt, GSAP tự đảo ngược đưa Lầu 2 lệch lại về sau để nhìn rõ bên dưới.
+      if (from.key === "stairs" && to.key === "floor2-nho") {
+        const f2Targets = [floor2Iso, floor2Badges].filter(Boolean);
+        if (f2Targets.length) {
+          master.to(
+            f2Targets,
+            { x: -520 * COS30, y: 520 * SIN30, duration: 0.62, ease: "power2.inOut" },
+            tStart
+          );
+        }
+        if (groundBadges) {
+          master.to(groundBadges, { autoAlpha: 0, duration: 0.25, ease: "power1.inOut" }, tStart);
+        }
+        if (groundStageGroup) {
+          master.to(groundStageGroup, { opacity: 0.3, duration: 0.5, ease: "power1.inOut" }, tStart + 0.06);
         }
       }
 

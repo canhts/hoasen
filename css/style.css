@@ -636,7 +636,7 @@ a {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding: clamp(66px, 7.5svh, 88px) clamp(20px, 4vw, 56px) clamp(16px, 2.5svh, 26px);
+  padding: clamp(56px, 6.5svh, 76px) clamp(20px, 4vw, 56px);
   overflow-y: auto;
   will-change: transform, opacity;
 }
@@ -825,7 +825,7 @@ a {
 }
 
 .gallery-note {
-  margin: 18px auto 0;
+  margin: 22px auto 0;
   text-align: center;
   font-family: var(--font-ui);
   font-size: 0.82rem;
@@ -836,18 +836,37 @@ a {
 /* Cảnh 9: Vườn Hoa Sen — Đội ngũ cô giáo */
 .garden-decor-back,
 .garden-decor-front {
-  position: relative;
+  position: absolute;
+  left: 0;
+  right: 0;
   width: 100%;
   pointer-events: none;
+  z-index: 1;
 }
 
 .garden-decor-back {
-  margin-bottom: -36px;
-  opacity: 0.85;
+  bottom: clamp(16px, 5svh, 64px);
+  height: clamp(180px, 28svh, 280px);
+  margin: 0;
+  opacity: 0.96;
 }
 
 .garden-decor-front {
-  margin-top: -10px;
+  bottom: 0;
+  height: clamp(72px, 12svh, 120px);
+  margin: 0;
+}
+
+.garden-decor-back svg,
+.garden-decor-front svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.epilogue-scene-panel.is-teachers .band-intro {
+  position: relative;
+  z-index: 3;
 }
 
 .teachers-garden-grid {
@@ -1150,13 +1169,6 @@ a {
   border: 0;
 }
 
-.storybook-colophon {
-  margin-top: 12px;
-  text-align: center;
-  font-size: 0.78rem;
-  color: var(--ink-light);
-}
-
 /* ============================================================================
  * LIGHTBOX PHÓNG TO ẢNH KHÔNG VIỀN
  * ============================================================================ */
@@ -1373,7 +1385,7 @@ a {
 
   .photo-bunting-grid {
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    row-gap: 38px;
+    row-gap: 24px;
     column-gap: 12px;
   }
 
@@ -1528,8 +1540,8 @@ a {
   }
 
   .epilogue-scene-panel {
-    justify-content: flex-start;
-    padding: 52px 10px 10px;
+    justify-content: center;
+    padding: 54px 12px;
   }
 
   .band-intro {
@@ -1600,8 +1612,13 @@ a {
     display: none;
   }
 
-  /* Cảnh 9 Mobile: 4 thẻ cô giáo gọn theo hàng ngang vừa khít 100svh */
-  .garden-decor-back,
+  /* Cảnh 9 Mobile: 4 thẻ cô giáo gọn theo hàng ngang căn giữa tâm, giữ đầm sen nền dịu */
+  .garden-decor-back {
+    bottom: 0;
+    height: 120px;
+    opacity: 0.65;
+  }
+
   .garden-decor-front {
     display: none;
   }
@@ -1720,10 +1737,6 @@ a {
 
   .map-embed-frame iframe {
     height: 98px;
-  }
-
-  .storybook-colophon {
-    display: none;
   }
 
   .lightbox-stage {

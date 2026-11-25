@@ -283,12 +283,6 @@ function renderEpilogue() {
       ${contactsHtml}
     </div>
 
-    <div class="postcard-actions">
-      <a class="action-btn maps" href="${escapeHtml(schoolInfo.maps.directUrl)}" target="_blank" rel="noopener noreferrer">
-        <span>${escapeHtml(schoolInfo.maps.buttonLabel)}</span>
-      </a>
-    </div>
-
     <div class="map-embed-frame">
       <iframe
         title="Bản đồ chỉ đường đến ${escapeHtml(schoolInfo.name)}"
@@ -299,9 +293,6 @@ function renderEpilogue() {
       ></iframe>
     </div>
   `;
-
-  document.getElementById("storybook-colophon").textContent =
-    `${schoolInfo.name} • ${schoolInfo.address} • Chú Cảnh: 0868.474.194 • Cô Hường: 0975.551.545`;
 }
 
 function renderStepper(onSelectChapter) {
