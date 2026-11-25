@@ -35,17 +35,15 @@ export const SCHOOL_DATA = {
       },
     ],
     hours: {
-      morningLabel: "Đón trẻ buổi sáng",
-      morningTime: "6h30 – 7h30",
-      afternoonLabel: "Trả trẻ buổi chiều",
-      afternoonTime: "16h00 – 17h00",
+      label: "Thời gian hoạt động",
+      text: "Từ 6h30 sáng, đến 17h00 chiều",
     },
     maps: {
       buttonLabel: "Chỉ đường Google Maps",
       directUrl:
-        "https://www.google.com/maps/search/?api=1&query=5P5Q%2B5G8%2C+L%C3%A2m+L%E1%BB%99c%2C+S%C6%A1n+T%E1%BB%8Bnh%2C+Qu%E1%BA%A3ng+Ng%C3%A3i+53217%2C+Vi%E1%BB%87t+Nam",
+        "https://www.google.com/maps/search/?api=1&query=15.157905572390417%2C108.73893262715227",
       embedUrl:
-        "https://maps.google.com/maps?q=5P5Q%2B5G8,%20L%C3%A2m%20L%E1%BB%99c,%20S%C6%A1n%20T%E1%BB%8Bnh,%20Qu%E1%BA%A3ng%20Ng%C3%A3i%2053217,%20Vi%E1%BB%87t%20Nam&t=&z=16&ie=UTF8&iwloc=&output=embed",
+        "https://maps.google.com/maps?q=15.157905572390417,108.73893262715227&t=&z=17&ie=UTF8&iwloc=&output=embed",
     },
     seoDescription:
       "Chuyến tham quan tương tác 2D giới thiệu Lớp Mầm Non Độc Lập Hoa Sen tại Lâm Lộc, Sơn Tịnh, Quảng Ngãi — ngôi nhà nhỏ ấm áp cho trẻ 5 tháng đến 6 tuổi.",
@@ -63,10 +61,10 @@ export const SCHOOL_DATA = {
   },
 
   /**
-   * 3. KỊCH BẢN 10 CHẶNG SCROLLYTELLING LIỀN MẠCH TOÀN TRANG
+   * 3. KỊCH BẢN 11 CHẶNG SCROLLYTELLING LIỀN MẠCH TOÀN TRANG
    * Thứ tự không gian Tầng trệt (Trái -> Phải):
-   * [Sân chơi chính] — [Lớp Nhà trẻ] — [Lớp Mẫu giáo bé] — [Văn phòng & Cầu thang] — [Kho dụng cụ -> Thực đơn tuần -> Bếp nấu]
-   * Luồng tham quan: Cổng -> Văn phòng & Bếp -> Sân chơi chính -> Nhà trẻ -> Mẫu giáo bé -> Cầu thang -> Lầu 2 -> Khoảnh khắc -> Giáo viên -> Liên hệ
+   * [Sân chơi chính] — [Lớp Nhà trẻ] — [Lớp Mẫu giáo bé] — [Văn phòng & Cầu thang] — [Kho dụng cụ & Bếp chữ L]
+   * Luồng tham quan: Cổng (1) -> Văn phòng & Bếp (2) -> Sân chơi (3) -> Nhà trẻ (4) -> Mẫu giáo bé (5) -> Cầu thang (6) -> Mẫu giáo nhỡ (7) -> Mẫu giáo lớn (8) -> Khoảnh khắc (9) -> Cô giáo (10) -> Liên hệ (11)
    */
   chapters: [
     {
@@ -76,14 +74,14 @@ export const SCHOOL_DATA = {
       eyebrow: "Chặng 1 • Chạm ngõ yêu thương",
       title: "Chào ba mẹ ghé thăm ngôi nhà nhỏ Hoa Sen!",
       story:
-        "Từ đầu ngõ nhìn vào, hàng rào xi măng được sơn màu tươi sáng chạy dọc hai bên cổng đã rạng rỡ đón nắng mai Sơn Tịnh. Bên trái là lá cờ Tổ quốc và bảng Nội quy phụ huynh, bên phải là góc Thông báo gọn gàng. Mời ba mẹ cuộn nhẹ để hai cánh cổng xanh viền hồng khẽ mở sang hai bên nhé!",
+        "Từ mặt đường rộng trước cổng nhìn vào, hàng rào xi măng sơn màu tươi sáng chạy dọc hai bên cổng đón nắng mai Sơn Tịnh. Bên trái là lá cờ Tổ quốc và bảng Nội quy phụ huynh, bên phải là bảng Thông báo gọn gàng. Mời ba mẹ cuộn nhẹ để hai cánh cổng mở rộng đón bước chân vào sân trường nhé!",
       badges: [
         { text: "Nhận trẻ 5 tháng – 6 tuổi", tone: "pink" },
         { text: "QĐ 1815/QĐ-UBND", tone: "teal" },
       ],
       highlights: [
         "Hàng rào xi măng sơn màu tươi tắn, kiên cố và an toàn",
-        "Đón trẻ buổi sáng 6h30 – 7h30 trong không khí thân thương",
+        "Thời gian hoạt động: Từ 6h30 sáng, đến 17h00 chiều",
       ],
       cardSide: "left",
       camera: {
@@ -97,22 +95,22 @@ export const SCHOOL_DATA = {
       stepLabel: "2",
       navTitle: "Văn phòng & Bếp",
       eyebrow: "Chặng 2 • Tầng trệt bên phải",
-      title: "Văn phòng Camera 24/7 cùng dãy Kho – Thực đơn – Bếp nấu",
+      title: "Văn phòng Camera 24/7 cùng khu Kho – Bếp chữ L",
       story:
-        "Bước qua cổng là Hiên chính với dãy cột hồng phấn, dây hoa rực rỡ và đối diện ngay là Văn phòng trường. Điểm ba mẹ yên tâm nhất là toàn trường có hệ thống camera giám sát 24/7 giúp phụ huynh dễ dàng dõi theo mọi hoạt động của con hằng ngày. Liền kề bên phải Văn phòng theo đúng thứ tự là Kho dụng cụ ngăn nắp, bảng Thực đơn tuần đầy đủ dinh dưỡng và góc Bếp nấu ấm thơm.",
+        "Bước qua cổng là Hiên chính với dãy cột hồng phấn, dây hoa rực rỡ và đối diện ngay là Văn phòng trường. Điểm ba mẹ yên tâm nhất là toàn trường có hệ thống camera giám sát 24/7 giúp phụ huynh dễ dàng dõi theo mọi hoạt động của con hằng ngày. Liền kề bên phải là Kho dụng cụ ngăn nắp nối liền khu Bếp nấu xoay chữ L kéo dài từ cạnh sau ra gần hàng rào trước với cửa mở hướng thẳng ra hành lang.",
       badges: [
         { text: "Camera giám sát 24/7", tone: "teal" },
-        { text: "Kho dụng cụ → Thực đơn tuần → Bếp nấu", tone: "green" },
+        { text: "Kho dụng cụ & Bếp chữ L", tone: "green" },
       ],
       highlights: [
         "Hệ thống camera giám sát 24/7 đồng hành cùng sự an tâm của ba mẹ",
-        "Khu vực bán trú bố trí một chiều: Kho dụng cụ → Thực đơn tuần → Bếp nấu",
+        "Kho dụng cụ & Bếp nấu nối liền hình chữ L, mở cửa thoáng ra hành lang",
       ],
       cardSide: "left",
       camera: {
-        desktop: { x: 1640, y: 1445, width: 1340, offsetX: 0.16, offsetY: 0.02 },
-        tablet: { x: 1680, y: 1455, width: 1120, offsetX: 0, offsetY: 0 },
-        mobile: { x: 1700, y: 1465, width: 880, offsetX: 0, offsetY: 0 },
+        desktop: { x: 1685, y: 1475, width: 1420, offsetX: 0.16, offsetY: 0.02 },
+        tablet: { x: 1680, y: 1495, width: 1160, offsetX: 0, offsetY: 0 },
+        mobile: { x: 1700, y: 1505, width: 920, offsetX: 0, offsetY: 0 },
       },
     },
     {
@@ -204,96 +202,87 @@ export const SCHOOL_DATA = {
       ],
       cardSide: "left",
       camera: {
-        desktop: { x: 1795, y: 1185, width: 880, offsetX: 0.16, offsetY: 0.01 },
-        tablet: { x: 1795, y: 1185, width: 820, offsetX: 0, offsetY: 0 },
-        mobile: { x: 1795, y: 1185, width: 640, offsetX: 0, offsetY: 0 },
+        desktop: { x: 1705, y: 1255, width: 960, offsetX: 0.16, offsetY: 0.01 },
+        tablet: { x: 1705, y: 1255, width: 880, offsetX: 0, offsetY: 0 },
+        mobile: { x: 1705, y: 1255, width: 700, offsetX: 0, offsetY: 0 },
       },
     },
     {
-      id: "floor2",
+      id: "floor2-nho",
       stepLabel: "7",
-      navTitle: "Lầu 2",
-      eyebrow: "Chặng 7 • Gác nhỏ sáng trong",
-      title: "Lầu 2: Lớp Mẫu giáo nhỡ & Lớp Mẫu giáo lớn vào Lớp 1",
+      navTitle: "Mẫu giáo nhỡ",
+      eyebrow: "Chặng 7 • Lầu 2 bên phải cầu thang",
+      title: "Lớp Mẫu giáo nhỡ — Sân chơi & góc sáng tạo của Cô Hồng",
       story:
-        "Lên tới Lầu 2 sau lớp rèm sọc xanh ngọc mát dịu là không gian của các anh chị lớn. Rẽ tay phải là Lớp Mẫu giáo nhỡ do Cô Hồng phụ trách với bàn học nhóm, góc vẽ nghệ thuật và khoảng sân chơi nhỏ bên phải gọn sạch cho giờ sinh hoạt, ăn xế.",
-      storySecondStop:
-        "Đi ngang lối cầu thang sang tay trái là Lớp Mẫu giáo lớn cùng Cô Nga và Cô Vy với bảng chữ cái, góc sách thân thiện giúp bé tự tin bước vào Lớp 1, nối liền sân chơi nhỏ xinh bên trái ngập tràn nắng nhẹ.",
-      subClasses: [
-        {
-          id: "floor2-nho",
-          positionHint: "Bên phải cầu thang",
-          name: "Lớp Mẫu giáo nhỡ",
-          description:
-            "Không gian khơi gợi trí tò mò cùng Cô Hồng với bàn học nhóm, góc vẽ sáng tạo và sân chơi nhỏ bên phải gọn sạch.",
-          badges: [
-            { text: "4 – 5 tuổi", tone: "sun" },
-            { text: "Cô Hồng", tone: "pink" },
-            { text: "Nhà vệ sinh riêng khép kín cho trẻ", tone: "teal" },
-          ],
-          camera: {
-            desktop: { x: 2295, y: 1125, width: 960, offsetX: 0.16, offsetY: 0.02 },
-            tablet: { x: 2295, y: 1125, width: 880, offsetX: 0, offsetY: 0 },
-            mobile: { x: 2295, y: 1125, width: 700, offsetX: 0, offsetY: 0 },
-          },
-        },
-        {
-          id: "floor2-lon",
-          positionHint: "Bên trái cầu thang",
-          name: "Lớp Mẫu giáo lớn",
-          description:
-            "Góc sách thân thiện, bảng chữ cái cùng Cô Nga & Cô Vy rèn nề nếp vào Lớp 1, kèm sân chơi nhỏ bên trái thoáng đãng.",
-          badges: [
-            { text: "5 – 6 tuổi", tone: "pink" },
-            { text: "Cô Nga • Cô Vy", tone: "green" },
-            { text: "Nhà vệ sinh riêng khép kín cho trẻ", tone: "teal" },
-          ],
-          camera: {
-            desktop: { x: 1645, y: 785, width: 980, offsetX: -0.16, offsetY: 0.02 },
-            tablet: { x: 1645, y: 785, width: 900, offsetX: 0, offsetY: 0 },
-            mobile: { x: 1645, y: 785, width: 720, offsetX: 0, offsetY: 0 },
-          },
-        },
-      ],
+        "Bước lên Lầu 2 dọc hành lang thoáng rộng phía trước là Lớp Mẫu giáo nhỡ do Cô Hồng phụ trách. Lớp nối liền ra khoảng sân chơi nhỏ bên phải được bảo vệ bởi hàng rào sắt an toàn, có giá vẽ mỹ thuật, bàn học nhóm và góc đồ chơi gọn sạch.",
       badges: [
-        { text: "4 – 5 tuổi & 5 – 6 tuổi", tone: "pink" },
-        { text: "2 sân chơi nhỏ gọn bên trái & phải", tone: "green" },
+        { text: "4 – 5 tuổi", tone: "sun" },
+        { text: "Cô Hồng", tone: "pink" },
+        { text: "Nhà vệ sinh riêng khép kín cho trẻ", tone: "teal" },
+      ],
+      highlights: [
+        "Hành lang Lầu 2 nối liền mạch từ cầu thang tới hai sân chơi hai đầu",
+        "Hàng rào sắt bao quanh 3 cạnh Lầu 2 bảo đảm an toàn cho bé",
       ],
       cardSide: "left",
       camera: {
-        desktop: { x: 2295, y: 1125, width: 960, offsetX: 0.16, offsetY: 0.02 },
-        tablet: { x: 2295, y: 1125, width: 880, offsetX: 0, offsetY: 0 },
-        mobile: { x: 2295, y: 1125, width: 700, offsetX: 0, offsetY: 0 },
+        desktop: { x: 2295, y: 1125, width: 980, offsetX: 0.16, offsetY: 0.02 },
+        tablet: { x: 2295, y: 1125, width: 900, offsetX: 0, offsetY: 0 },
+        mobile: { x: 2295, y: 1125, width: 720, offsetX: 0, offsetY: 0 },
+      },
+    },
+    {
+      id: "floor2-lon",
+      stepLabel: "8",
+      navTitle: "Mẫu giáo lớn",
+      eyebrow: "Chặng 8 • Lầu 2 bên trái cầu thang",
+      title: "Lớp Mẫu giáo lớn — Vững bước sẵn sàng vào Lớp 1",
+      story:
+        "Đi dọc hành lang Lầu 2 sang tay trái là Lớp Mẫu giáo lớn của Cô Nga và Cô Vy — điểm dừng cuối trong hành trình tham quan ngôi trường. Bàn học ngay ngắn hướng bảng chữ cái, tủ sách đa sắc màu và sân chơi nhỏ bên trái giúp bé rèn nề nếp tự tin bước vào Lớp 1.",
+      badges: [
+        { text: "5 – 6 tuổi", tone: "pink" },
+        { text: "Cô Nga • Cô Vy", tone: "green" },
+        { text: "Nhà vệ sinh riêng khép kín cho trẻ", tone: "teal" },
+      ],
+      highlights: [
+        "Góc sách & bảng chữ cái rèn thói quen học tập chuẩn bị vào Lớp 1",
+        "Nối thẳng ra sân chơi nhỏ bên trái rào sắt an toàn 3 cạnh",
+      ],
+      cardSide: "right",
+      camera: {
+        desktop: { x: 1520, y: 805, width: 1040, offsetX: -0.2, offsetY: 0.02 },
+        tablet: { x: 1580, y: 785, width: 920, offsetX: 0, offsetY: 0 },
+        mobile: { x: 1610, y: 785, width: 740, offsetX: 0, offsetY: 0 },
       },
     },
     {
       id: "gallery",
-      stepLabel: "8",
+      stepLabel: "9",
       navTitle: "Khoảnh khắc",
-      eyebrow: "Chặng 8 • Dây cờ ảnh kỷ niệm",
+      eyebrow: "Chặng 9 • Dây cờ ảnh kỷ niệm",
       title: "Khoảnh khắc rạng rỡ treo tự nhiên trên bầu trời Hoa Sen",
     },
     {
       id: "teachers",
-      stepLabel: "9",
+      stepLabel: "10",
       navTitle: "Cô giáo",
-      eyebrow: "Chặng 9 • Vườn Hoa Sen yêu thương",
+      eyebrow: "Chặng 10 • Vườn Hoa Sen yêu thương",
       title: "Đội ngũ cô giáo tận tâm đồng hành từng lớp học",
     },
     {
       id: "contact",
-      stepLabel: "10",
+      stepLabel: "11",
       navTitle: "Liên hệ",
-      eyebrow: "Chặng 10 • Bưu thiếp chiều nắng ấm",
+      eyebrow: "Chặng 11 • Bưu thiếp chiều nắng ấm",
       title: "Lời hẹn ghé thăm Lớp Mầm Non Độc Lập Hoa Sen",
     },
   ],
 
   /**
-   * 4. CHẶNG 8: KHOẢNH KHẮC NỔI BẬT (BỐ CỤC TREO TỰ DO, LỆCH TẦNG TỰ NHIÊN)
+   * 4. CHẶNG 9: KHOẢNH KHẮC NỔI BẬT (BỐ CỤC TREO TỰ DO, LỆCH TẦNG TỰ NHIÊN)
    */
   gallery: {
-    eyebrow: "Chặng 8 • Dây cờ ảnh kỷ niệm",
+    eyebrow: "Chặng 9 • Dây cờ ảnh kỷ niệm",
     title: "Khoảnh khắc rạng rỡ của bé ở Hoa Sen",
     subtitle:
       "Những tấm ảnh thật được kẹp ngẫu nhiên trên dây cờ mềm mại — bấm vào từng ảnh để phóng to và vuốt xem trọn bộ.",
@@ -366,10 +355,10 @@ export const SCHOOL_DATA = {
   },
 
   /**
-   * 5. CHẶNG 9: ĐỘI NGŨ GIÁO VIÊN PHỤ TRÁCH CHÍNH XÁC TỪNG LỚP
+   * 5. CHẶNG 10: ĐỘI NGŨ GIÁO VIÊN PHỤ TRÁCH CHÍNH XÁC TỪNG LỚP
    */
   teachersSection: {
-    eyebrow: "Chặng 9 • Vườn Hoa Sen yêu thương",
+    eyebrow: "Chặng 10 • Vườn Hoa Sen yêu thương",
     title: "Những cô giáo dịu dàng đồng hành cùng từng lớp",
     subtitle:
       "Mỗi độ tuổi tại Hoa Sen luôn có các cô tận tâm nâng niu, đón từng bước chân bé bằng sự ân cần như gia đình.",
@@ -445,16 +434,16 @@ export const SCHOOL_DATA = {
   },
 
   /**
-   * 6. CHẶNG 10: BƯU THIẾP LIÊN HỆ CHIỀU NẮNG ẤM TẠI SƠN TỊNH
+   * 6. CHẶNG 11: BƯU THIẾP LIÊN HỆ CHIỀU NẮNG ẤM TẠI SƠN TỊNH
    */
   contactSection: {
-    eyebrow: "Chặng 10 • Bưu thiếp chiều nắng ấm tại Sơn Tịnh",
+    eyebrow: "Chặng 11 • Bưu thiếp chiều nắng ấm tại Sơn Tịnh",
     subtitle:
       "Cánh cổng Hoa Sen luôn rộng mở đón phụ huynh đến tham quan lớp học, theo dõi hệ thống camera và trò chuyện cùng các cô.",
     stampLabel: "Sơn Tịnh • 2025",
     decisionLabel: "Quyết định thành lập",
     addressLabel: "Địa chỉ Google Maps",
-    hoursTitle: "Giờ đón – trả trẻ mỗi ngày",
+    hoursTitle: "Thời gian hoạt động",
     contactsTitle: "Liên hệ phụ huynh",
   },
 };

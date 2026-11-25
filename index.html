@@ -7,11 +7,10 @@
   <title>Lớp Mầm Non Độc Lập Hoa Sen — Tham quan ngôi trường 2D tương tác</title>
   <meta
     name="description"
-    content="Chuyến tham quan tương tác 2D giới thiệu Lớp Mầm Non Độc Lập Hoa Sen tại 5P5Q+5G8, Lâm Lộc, Sơn Tịnh, Quảng Ngãi."
+    content="Chuyến tham quan tương tác 2D Flat Isometric giới thiệu Lớp Mầm Non Độc Lập Hoa Sen tại 5P5Q+5G8, Lâm Lộc, Sơn Tịnh, Quảng Ngãi."
   />
   <link rel="icon" type="image/png" href="assets/images/logo-hoa-sen.png" />
 
-  <!-- Font chữ tiếng Việt mềm mại, giàu chất kể chuyện & dễ đọc -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
@@ -22,12 +21,11 @@
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
-  <!-- Lớp hạt giấy mịn (Paper Grain ~2.8%) -->
   <div class="paper-grain" aria-hidden="true"></div>
 
   <!-- Thanh header nổi không viền tối giản -->
   <header class="top-chrome" id="top-chrome">
-    <a class="brand-pill" href="#chapter-gate" aria-label="Về đầu hành trình Lớp Mầm Non Độc Lập Hoa Sen">
+    <a class="brand-pill" href="#step-gate" aria-label="Về đầu hành trình Lớp Mầm Non Độc Lập Hoa Sen">
       <span class="brand-lotus">
         <img
           id="brand-logo-img"
@@ -43,56 +41,71 @@
       </span>
     </a>
 
-    <!-- Nhãn tiến độ gọn cho Mobile / Tablet -->
     <div class="mobile-progress-pill" id="mobile-progress-pill" aria-live="polite">
       <span class="progress-dot"></span>
       <span id="mobile-step-text">Chặng 1 • Cổng Hoa Sen</span>
     </div>
 
     <div class="chrome-actions">
-      <a class="chrome-link" id="top-contact-link" href="#trigger-contact">Liên hệ</a>
-      <a class="chrome-cta" id="top-call-cta" href="tel:0868474194">
-        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" aria-hidden="true">
-          <path
-            d="M5.4 3.5H8.8C9.3 3.5 9.8 3.9 9.9 4.4L10.6 7.4C10.7 7.9 10.5 8.4 10.1 8.7L8.4 9.9C9.5 12.2 11.4 14.1 13.7 15.2L14.9 13.5C15.2 13.1 15.7 12.9 16.2 13L19.2 13.7C19.7 13.8 20.1 14.3 20.1 14.8V18.2C20.1 19.2 19.2 20 18.2 19.9C10.3 19.4 4.1 13.2 3.6 5.3C3.5 4.3 4.4 3.5 5.4 3.5Z"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-        </svg>
-        <span id="top-call-text">0868.474.194</span>
-      </a>
+      <a class="chrome-link" id="top-contact-link" href="#step-contact">Liên hệ</a>
+      <div class="call-menu-wrap" id="call-menu-wrap">
+        <button
+          type="button"
+          class="chrome-cta-circle"
+          id="top-call-toggle"
+          aria-expanded="false"
+          aria-haspopup="true"
+          aria-controls="top-call-popover"
+          aria-label="Mở danh bạ gọi điện Hoa Sen"
+        >
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" aria-hidden="true">
+            <path
+              d="M5.4 3.5H8.8C9.3 3.5 9.8 3.9 9.9 4.4L10.6 7.4C10.7 7.9 10.5 8.4 10.1 8.7L8.4 9.9C9.5 12.2 11.4 14.1 13.7 15.2L14.9 13.5C15.2 13.1 15.7 12.9 16.2 13L19.2 13.7C19.7 13.8 20.1 14.3 20.1 14.8V18.2C20.1 19.2 19.2 20 18.2 19.9C10.3 19.4 4.1 13.2 3.6 5.3C3.5 4.3 4.4 3.5 5.4 3.5Z"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </button>
+        <div class="call-popover" id="top-call-popover" role="menu" hidden>
+          <a class="call-popover-item" id="call-opt-canh" role="menuitem" href="tel:0868474194">
+            <span class="call-item-name">Gọi Chú Cảnh</span>
+            <span class="call-item-phone">0868.474.194</span>
+          </a>
+          <a class="call-popover-item" id="call-opt-huong" role="menuitem" href="tel:0975551545">
+            <span class="call-item-name">Gọi Cô Hường</span>
+            <span class="call-item-phone">0975.551.545</span>
+          </a>
+        </div>
+      </div>
     </div>
   </header>
 
-  <!-- Thanh định vị hành trình tối giản (Pill Stepper cho toàn bộ 10 chặng) -->
+  <!-- Thanh định vị hành trình tối giản (11 chặng thống nhất) -->
   <nav class="journey-stepper" id="journey-stepper" aria-label="Định vị các chặng tham quan"></nav>
 
-  <!-- KHỐI KỂ CHUYỆN LIỀN MẠCH DUY NHẤT TỪ CỔNG TRƯỜNG ĐẾN LIÊN HỆ -->
+  <!-- MỘT KHỐI SÂN KHẤU THỐNG NHẤT DUY NHẤT (KHÔNG KÉO LÊN XUỐNG GIỮA CÁC CHƯƠNG) -->
   <main id="storybook-main" class="unified-story-root">
-    <!-- PHẦN A: HÀNH TRÌNH KIẾN TRÚC 2.5D (Chặng 1 -> Chặng 7) -->
-    <section class="campus-journey" id="campus-journey" aria-label="Hành trình tham quan khuôn viên trường">
-      <div class="stage-viewport" id="stage-viewport">
+    <section class="master-scrollytelling" id="master-scrollytelling" aria-label="Hành trình tham quan tương tác Hoa Sen">
+      <!-- Sân khấu ghim cố định chứa bản đồ Isometric, thẻ kể chuyện xuất hiện tại chỗ & 3 cảnh cuối -->
+      <div class="master-sticky-viewport" id="stage-viewport">
         <div class="stage-sky-backdrop" id="stage-sky-backdrop" aria-hidden="true"></div>
+
+        <!-- Bản đồ 2D Flat Isometric 30° + đường dẫn chuyện -->
         <div class="stage-canvas" id="stage-canvas">
           <div class="svg-layer-host" id="svg-scene-host"></div>
           <div class="svg-guide-host" id="svg-guide-host"></div>
         </div>
+
         <div class="stage-bottom-mist" aria-hidden="true"></div>
-      </div>
 
-      <div class="story-track" id="story-track"></div>
-    </section>
+        <!-- Khung thẻ kể chuyện Chương 1 -> Chương 7 xuất hiện giữa không gian (không kéo lên xuống) -->
+        <div class="story-cards-overlay" id="story-cards-overlay"></div>
 
-    <!-- PHẦN B: CHUYỂN TIẾP LIỀN MẠCH KHOẢNH KHẮC -> GIÁO VIÊN -> LIÊN HỆ -->
-    <section class="epilogue-journey" id="epilogue-journey" aria-label="Khoảnh khắc, Giáo viên và Liên hệ">
-      <!-- Trên Desktop (>=1024px): sân khấu ghim thống nhất 100svh chuyển cảnh bằng GSAP Scrub -->
-      <div class="epilogue-stage-sticky" id="epilogue-stage-sticky">
-        <div class="epilogue-sky-morph" id="epilogue-sky-morph" aria-hidden="true"></div>
+        <!-- Dây nối hoa sen & 3 cảnh cuối chuyển cảnh mượt trực tiếp trong cùng sân khấu -->
         <div class="epilogue-vine-layer" id="epilogue-vine-layer" aria-hidden="true"></div>
 
-        <!-- 3 cảnh nối tiếp nhau bằng animation chuyển cảnh mượt mà -->
         <div class="epilogue-panels-stage" id="epilogue-panels-stage">
           <!-- Cảnh 8: Khoảnh khắc treo ngẫu nhiên tự nhiên -->
           <div class="epilogue-scene-panel is-gallery" id="panel-gallery" data-epilogue-panel="gallery">
@@ -143,16 +156,12 @@
         </div>
       </div>
 
-      <!-- Đường ray cuộn điều phối GSAP Scrub trên Desktop cho 3 cảnh cuối -->
-      <div class="epilogue-scroll-triggers" id="epilogue-scroll-triggers" aria-hidden="true">
-        <div class="epilogue-trigger-slot" id="trigger-gallery" data-chapter="gallery"></div>
-        <div class="epilogue-trigger-slot" id="trigger-teachers" data-chapter="teachers"></div>
-        <div class="epilogue-trigger-slot" id="trigger-contact" data-chapter="contact"></div>
-      </div>
+      <!-- Đường ray nhịp cuộn vô hình điều phối toàn bộ 11 điểm dừng (Chặng 1 -> Chặng 10) -->
+      <div class="master-scroll-track" id="master-scroll-track" aria-hidden="true"></div>
     </section>
   </main>
 
-  <!-- Lightbox phóng to ảnh hoạt động thật (không viền, hỗ trợ ESC, mũi tên & vuốt) -->
+  <!-- Lightbox phóng to ảnh hoạt động thật -->
   <div class="lightbox" id="photo-lightbox" data-lenis-prevent role="dialog" aria-modal="true" aria-labelledby="lightbox-title" hidden>
     <div class="lightbox-backdrop" data-lightbox-close></div>
     <div class="lightbox-panel">
@@ -188,7 +197,6 @@
     </div>
   </div>
 
-  <!-- Thư viện chuyển động GSAP + ScrollTrigger + Lenis -->
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.7/dist/gsap.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.7/dist/ScrollTrigger.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.20/dist/lenis.min.js"></script>

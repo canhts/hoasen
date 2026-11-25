@@ -1,16 +1,20 @@
 /**
  * ============================================================================
- * KỊCH BẢN CHUYỂN ĐỘNG THỐNG NHẤT TOÀN TRANG (GSAP + SCROLLTRIGGER + LENIS)
+ * KỊCH BẢN SÂN KHẤU THỐNG NHẤT DUY NHẤT (SINGLE PINNED MASTER TIMELINE)
  * ============================================================================
- * - Cổng chính mở đều hai cánh sang trái & phải khung hình (không biến mất)
- * - Thứ tự tham quan: Cổng -> Văn phòng/Bếp -> Sân chơi -> Nhà trẻ -> Mẫu giáo bé -> Cầu thang -> Lầu 2
- * - Chuyển tiếp liền mạch thống nhất sang Khoảnh khắc -> Giáo viên -> Liên hệ
+ * - 2 cánh cổng trượt mở theo đúng góc 30° dọc 2 trụ cổng và DỪNG TẠI 2 TRỤ
+ * - Các thẻ Chương 1 -> 7 xuất hiện TẠI CHỖ giữa không gian (không kéo lên xuống)
+ * - Chuyển tiếp Sơ đồ Nhà trẻ -> Khoảnh khắc -> Giáo viên -> Liên hệ mượt mà tại chỗ
  */
 
-function computeCameraTransform(cam, vw, vh, minWorldHeight) {
-  const scale = Math.min(vw / cam.width, vh / minWorldHeight);
-  const screenFocusX = vw * (0.5 + (cam.offsetX || 0));
-  const screenFocusY = vh * (0.5 + (cam.offsetY || 0));
+const COS30 = 0.8660254;
+const SIN30 = 0.5;
+
+function computeCameraTransform(cam, vw, vh, minWorldHeight, isSplitMobile) {
+  const stageH = isSplitMobile ? vh * 0.5 : vh;
+  const scale = Math.min(vw / cam.width, stageH / minWorldHeight);
+  const screenFocusX = vw * (0.5 + (isSplitMobile ? 0 : cam.offsetX || 0));
+  const screenFocusY = stageH * (0.5 + (isSplitMobile ? 0 : cam.offsetY || 0));
   return {
     x: screenFocusX - cam.x * scale,
     y: screenFocusY - cam.y * scale,
@@ -21,7 +25,6 @@ function computeCameraTransform(cam, vw, vh, minWorldHeight) {
 export function initChoreography({ data, onChapterChange }) {
   const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  // Khởi tạo cuộn mượt Lenis (giữ vuốt tự nhiên trên cảm ứng)
   let lenis = null;
   if (typeof window.Lenis === "function" && !prefersReducedMotion) {
     lenis = new window.Lenis({
@@ -44,76 +47,51 @@ export function initChoreography({ data, onChapterChange }) {
     }
   }
 
-  function resolveScrollTarget(target) {
-    if (typeof target !== "string") return target;
-    if (target === "gallery" || target === "teachers" || target === "contact") {
-      const sel = window.innerWidth >= 1024 ? `#trigger-${target}` : `#panel-${target}`;
-      return document.querySelector(sel);
-    }
-    if (target.startsWith("#")) return document.querySelector(target);
-    return document.querySelector(`#chapter-${target}`);
+  function resolveStepSlot(target) {
+    if (!target) return null;
+    const key = String(target).replace(/^#?(chapter-|step-)/, "");
+    if (key === "floor2") return document.getElementById("step-floor2-nho");
+    return document.getElementById(`step-${key}`) || document.querySelector(`[data-step="${key}"]`);
   }
 
-  // Fallback ngoại tuyến khi không có GSAP CDN
+  // Fallback ngoại tuyến khi không có GSAP
   if (!window.gsap || !window.ScrollTrigger) {
-    const stageViewport = document.getElementById("stage-viewport");
+    const cards = Array.from(document.querySelectorAll(".story-card"));
+    const panels = Array.from(document.querySelectorAll(".epilogue-scene-panel"));
+    const stageCanvas = document.getElementById("stage-canvas");
     const svgLayerHost = document.getElementById("svg-scene-host");
     const svgGuideHost = document.getElementById("svg-guide-host");
-    const facadeCurtain = document.getElementById("facade-curtain");
-    const gateDoorLeft = document.getElementById("gate-leaf-left");
-    const gateDoorRight = document.getElementById("gate-leaf-right");
-    const fallbackTargets = [
-      { sel: '[data-chapter="gate"]', id: "gate", cam: data.chapters.find((c) => c.id === "gate").camera },
-      { sel: '[data-chapter="veranda-kitchen"]', id: "veranda-kitchen", cam: data.chapters.find((c) => c.id === "veranda-kitchen").camera },
-      { sel: '[data-chapter="playground"]', id: "playground", cam: data.chapters.find((c) => c.id === "playground").camera },
-      { sel: '[data-chapter="nursery"]', id: "nursery", cam: data.chapters.find((c) => c.id === "nursery").camera },
-      { sel: '[data-chapter="preschool-small"]', id: "preschool-small", cam: data.chapters.find((c) => c.id === "preschool-small").camera },
-      { sel: '[data-chapter="stairs"]', id: "stairs", cam: data.chapters.find((c) => c.id === "stairs").camera },
-      { sel: "#floor2-stop-nho", id: "floor2", cam: data.chapters.find((c) => c.id === "floor2").subClasses[0].camera },
-      { sel: "#floor2-stop-lon", id: "floor2", cam: data.chapters.find((c) => c.id === "floor2").subClasses[1].camera },
-    ];
-    if (svgLayerHost && svgGuideHost && stageViewport) {
-      [svgLayerHost, svgGuideHost].forEach((el) => {
-        el.style.transition = prefersReducedMotion ? "none" : "transform 0.65s cubic-bezier(0.22, 1, 0.36, 1)";
+    const showStep = (stepKey) => {
+      const isEpilogue = ["gallery", "teachers", "contact"].includes(stepKey);
+      if (stageCanvas) stageCanvas.style.opacity = isEpilogue ? "0" : "1";
+      cards.forEach((c) => {
+        c.style.opacity = c.getAttribute("data-card-step") === stepKey ? "1" : "0";
+        c.style.pointerEvents = c.getAttribute("data-card-step") === stepKey ? "auto" : "none";
       });
-      const applyCam = (camObj, chId) => {
-        const vw = stageViewport.clientWidth || window.innerWidth;
-        const vh = stageViewport.clientHeight || window.innerHeight;
-        const mode = vw >= 1024 ? "desktop" : vw >= 768 ? "tablet" : "mobile";
-        const minH = mode === "desktop" ? 760 : mode === "tablet" ? 700 : 670;
-        const t = computeCameraTransform(camObj[mode], vw, vh, minH);
-        const tf = `translate3d(${t.x}px, ${t.y}px, 0) scale(${t.scale})`;
-        svgLayerHost.style.transform = tf;
-        svgGuideHost.style.transform = tf;
-        if (facadeCurtain) facadeCurtain.style.opacity = chId === "gate" ? "1" : "0";
-        if (gateDoorLeft && gateDoorRight) {
-          const w = 208 * t.scale;
-          gateDoorLeft.style.width = `${w}px`;
-          gateDoorRight.style.width = `${w}px`;
-          gateDoorLeft.style.opacity = chId === "gate" || chId === "veranda-kitchen" ? "1" : "0";
-          gateDoorRight.style.opacity = chId === "gate" || chId === "veranda-kitchen" ? "1" : "0";
-        }
-        onChapterChange(chId);
-      };
-      applyCam(fallbackTargets[0].cam, "gate");
-      const io = new IntersectionObserver(
-        (entries) => {
-          const hit = entries.find((e) => e.isIntersecting);
-          if (!hit) return;
-          const match = fallbackTargets.find((f) => document.querySelector(f.sel) === hit.target);
-          if (match) applyCam(match.cam, match.id);
-        },
-        { threshold: 0.45 }
-      );
-      fallbackTargets.forEach((f) => {
-        const el = document.querySelector(f.sel);
-        if (el) io.observe(el);
+      panels.forEach((p) => {
+        p.style.opacity = p.getAttribute("data-epilogue-panel") === stepKey ? "1" : "0";
+        p.style.pointerEvents = p.getAttribute("data-epilogue-panel") === stepKey ? "auto" : "none";
       });
+      onChapterChange(stepKey);
+    };
+    showStep("gate");
+    if (svgLayerHost && svgGuideHost) {
+      const t = computeCameraTransform(data.chapters[0].camera.desktop, window.innerWidth, window.innerHeight, 760, false);
+      svgLayerHost.style.transform = `translate3d(${t.x}px, ${t.y}px, 0) scale(${t.scale})`;
+      svgGuideHost.style.transform = `translate3d(${t.x}px, ${t.y}px, 0) scale(${t.scale})`;
     }
+    const io = new IntersectionObserver(
+      (entries) => {
+        const hit = entries.find((e) => e.isIntersecting);
+        if (hit) showStep(hit.target.getAttribute("data-step"));
+      },
+      { threshold: 0.45 }
+    );
+    document.querySelectorAll(".scroll-step-slot").forEach((s) => io.observe(s));
     return {
       scrollToTarget: (target) => {
-        const el = resolveScrollTarget(target);
-        if (el) el.scrollIntoView({ behavior: prefersReducedMotion ? "auto" : "smooth" });
+        const slot = resolveStepSlot(target);
+        if (slot) slot.scrollIntoView({ behavior: prefersReducedMotion ? "auto" : "smooth", block: "center" });
       },
     };
   }
@@ -123,27 +101,93 @@ export function initChoreography({ data, onChapterChange }) {
   gsap.registerPlugin(ScrollTrigger);
 
   const stageViewport = document.getElementById("stage-viewport");
+  const skyBackdrop = document.getElementById("stage-sky-backdrop");
+  const stageCanvas = document.getElementById("stage-canvas");
   const svgLayerHost = document.getElementById("svg-scene-host");
   const svgGuideHost = document.getElementById("svg-guide-host");
   const skyLayer = document.getElementById("layer-sky");
-  const verandaForeground = document.getElementById("veranda-foreground");
-  const floor2Trim = document.getElementById("floor2-front-trim");
   const facadeCurtain = document.getElementById("facade-curtain");
-  const greenCurtains = document.getElementById("facade-green-curtains");
-  const outerWalls = document.getElementById("facade-outer-walls");
-  const gatePillars = document.getElementById("gate-pillars");
-  const gateSignGroup = document.getElementById("gate-sign-group");
   const gateLeafLeft = document.getElementById("gate-leaf-left");
   const gateLeafRight = document.getElementById("gate-leaf-right");
   const storyPath = document.getElementById("campus-story-path");
   const floatingLotus = document.getElementById("floating-lotus-lead");
-  const petalA = document.getElementById("floating-petal-a");
-  const petalB = document.getElementById("floating-petal-b");
+  const epilogueVineLayer = document.getElementById("epilogue-vine-layer");
 
-  const epilogueSky = document.getElementById("epilogue-sky-morph");
   const panelGallery = document.getElementById("panel-gallery");
   const panelTeachers = document.getElementById("panel-teachers");
   const panelContact = document.getElementById("panel-contact");
+
+  const roomBadges = Array.from(document.querySelectorAll(".iso-room-badge")).map((el) => ({
+    el,
+    step: el.getAttribute("data-room-step"),
+    fullWidth: parseFloat(el.getAttribute("data-full-width")) || 200,
+    iconX: -80,
+    rect: el.querySelector(".iso-badge-rect"),
+    icon: el.querySelector(".iso-badge-icon"),
+    text: el.querySelector(".iso-badge-text"),
+  }));
+
+  function measureRoomBadges() {
+    const iconW = 14;
+    const gap = 8;
+    const padX = 18;
+    roomBadges.forEach((b) => {
+      if (!b.text || typeof b.text.getComputedTextLength !== "function") return;
+      const textLen = b.text.getComputedTextLength() || b.fullWidth - 52;
+      const contentW = iconW + gap + textLen;
+      b.fullWidth = Math.max(88, Math.ceil(contentW + padX * 2));
+      b.iconX = +(-contentW / 2 + iconW / 2).toFixed(1);
+      const textX = +(-contentW / 2 + iconW + gap).toFixed(1);
+      b.el.setAttribute("data-full-width", String(b.fullWidth));
+      b.text.setAttribute("x", String(textX));
+    });
+  }
+  measureRoomBadges();
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(() => {
+      measureRoomBadges();
+    });
+  }
+
+  let currentBadgeStep = null;
+  function setActiveRoomBadges(stepKey, immediate = false) {
+    if (stepKey === currentBadgeStep) return;
+    currentBadgeStep = stepKey;
+    roomBadges.forEach(({ el, step, fullWidth, iconX, rect, icon, text }) => {
+      const active = step === stepKey;
+      el.classList.toggle("is-expanded", active);
+      const targetX = active ? -fullWidth / 2 : -19;
+      const targetW = active ? fullWidth : 38;
+      const targetIconX = active ? iconX : 0;
+      const dur = immediate ? 0 : 0.42;
+
+      if (rect) {
+        gsap.to(rect, {
+          attr: { x: targetX, width: targetW },
+          duration: dur,
+          ease: active ? "back.out(1.2)" : "power2.inOut",
+          overwrite: "auto",
+        });
+      }
+      if (icon) {
+        gsap.to(icon, {
+          x: targetIconX,
+          duration: dur,
+          ease: "power2.out",
+          overwrite: "auto",
+        });
+      }
+      if (text) {
+        gsap.to(text, {
+          autoAlpha: active ? 1 : 0,
+          x: active ? 0 : -6,
+          duration: immediate ? 0 : active ? 0.28 : 0.16,
+          delay: immediate || !active ? 0 : 0.1,
+          overwrite: "auto",
+        });
+      }
+    });
+  }
 
   const lamps = {
     nt: document.getElementById("lamp-nt-cone"),
@@ -161,36 +205,45 @@ export function initChoreography({ data, onChapterChange }) {
     });
   }
 
-  // Lấy cấu hình camera theo thứ tự tham quan mới:
-  // Cổng -> Văn phòng & Bếp -> Sân chơi -> Nhà trẻ -> Mẫu giáo bé -> Cầu thang -> Lầu 2
-  const chapterGate = data.chapters.find((c) => c.id === "gate");
-  const chapterVeranda = data.chapters.find((c) => c.id === "veranda-kitchen");
-  const chapterPlayground = data.chapters.find((c) => c.id === "playground");
-  const chapterNursery = data.chapters.find((c) => c.id === "nursery");
-  const chapterSmall = data.chapters.find((c) => c.id === "preschool-small");
-  const chapterStairs = data.chapters.find((c) => c.id === "stairs");
-  const chapterFloor2 = data.chapters.find((c) => c.id === "floor2");
-  const floor2Nho = chapterFloor2.subClasses[0];
-  const floor2Lon = chapterFloor2.subClasses[1];
+  const chGate = data.chapters.find((c) => c.id === "gate");
+  const chVeranda = data.chapters.find((c) => c.id === "veranda-kitchen");
+  const chPlayground = data.chapters.find((c) => c.id === "playground");
+  const chNursery = data.chapters.find((c) => c.id === "nursery");
+  const chSmall = data.chapters.find((c) => c.id === "preschool-small");
+  const chStairs = data.chapters.find((c) => c.id === "stairs");
+  const floor2Nho = data.chapters.find((c) => c.id === "floor2-nho");
+  const floor2Lon = data.chapters.find((c) => c.id === "floor2-lon");
+
+  const cardsMap = {
+    gate: document.getElementById("card-gate"),
+    "veranda-kitchen": document.getElementById("card-veranda-kitchen"),
+    playground: document.getElementById("card-playground"),
+    nursery: document.getElementById("card-nursery"),
+    "preschool-small": document.getElementById("card-preschool-small"),
+    stairs: document.getElementById("card-stairs"),
+    "floor2-nho": document.getElementById("card-floor2-nho"),
+    "floor2-lon": document.getElementById("card-floor2-lon"),
+  };
 
   const mm = gsap.matchMedia();
 
-  function buildStageTimeline(mode, minWorldHeight, parallaxStrength, triggerStart, triggerEnd) {
+  function buildMasterTimeline(mode, minWorldHeight, parallaxStrength, isSplitMobile) {
     const vw = stageViewport.clientWidth || window.innerWidth;
     const vh = stageViewport.clientHeight || window.innerHeight;
-    const camFor = (camObj) => computeCameraTransform(camObj[mode], vw, vh, minWorldHeight);
+    const camFor = (camObj) => computeCameraTransform(camObj[mode], vw, vh, minWorldHeight, isSplitMobile);
 
     const stops = [
-      { id: "gate", trigger: '[data-chapter="gate"]', cam: camFor(chapterGate.camera), raw: chapterGate.camera[mode] },
-      { id: "veranda-kitchen", trigger: '[data-chapter="veranda-kitchen"]', cam: camFor(chapterVeranda.camera), raw: chapterVeranda.camera[mode] },
-      { id: "playground", trigger: '[data-chapter="playground"]', cam: camFor(chapterPlayground.camera), raw: chapterPlayground.camera[mode] },
-      { id: "nursery", trigger: '[data-chapter="nursery"]', cam: camFor(chapterNursery.camera), raw: chapterNursery.camera[mode] },
-      { id: "preschool-small", trigger: '[data-chapter="preschool-small"]', cam: camFor(chapterSmall.camera), raw: chapterSmall.camera[mode] },
-      { id: "stairs", trigger: '[data-chapter="stairs"]', cam: camFor(chapterStairs.camera), raw: chapterStairs.camera[mode] },
-      { id: "floor2-nho", trigger: "#floor2-stop-nho", cam: camFor(floor2Nho.camera), raw: floor2Nho.camera[mode] },
-      { id: "floor2-lon", trigger: "#floor2-stop-lon", cam: camFor(floor2Lon.camera), raw: floor2Lon.camera[mode] },
+      { key: "gate", ch: "gate", cam: camFor(chGate.camera), raw: chGate.camera[mode] },
+      { key: "veranda-kitchen", ch: "veranda-kitchen", cam: camFor(chVeranda.camera), raw: chVeranda.camera[mode] },
+      { key: "playground", ch: "playground", cam: camFor(chPlayground.camera), raw: chPlayground.camera[mode] },
+      { key: "nursery", ch: "nursery", cam: camFor(chNursery.camera), raw: chNursery.camera[mode] },
+      { key: "preschool-small", ch: "preschool-small", cam: camFor(chSmall.camera), raw: chSmall.camera[mode] },
+      { key: "stairs", ch: "stairs", cam: camFor(chStairs.camera), raw: chStairs.camera[mode] },
+      { key: "floor2-nho", ch: "floor2-nho", cam: camFor(floor2Nho.camera), raw: floor2Nho.camera[mode] },
+      { key: "floor2-lon", ch: "floor2-lon", cam: camFor(floor2Lon.camera), raw: floor2Lon.camera[mode] },
     ];
 
+    // Trạng thái ban đầu: Chặng 1 (Cổng Hoa Sen đóng khít & hàng rào rõ 100%)
     const init = stops[0].cam;
     gsap.set([svgLayerHost, svgGuideHost], {
       x: init.x,
@@ -198,471 +251,303 @@ export function initChoreography({ data, onChapterChange }) {
       scale: init.scale,
       transformOrigin: "0 0",
     });
+    gsap.set(stageCanvas, { autoAlpha: 1, scale: 1 });
+    gsap.set([gateLeafLeft, gateLeafRight], { x: 0, y: 0, autoAlpha: 1 });
+    if (facadeCurtain) gsap.set(facadeCurtain, { opacity: 1 });
+    currentBadgeStep = null;
+    setActiveRoomBadges("gate", true);
 
-    // Khớp vị trí ban đầu của hai cánh cổng chính vào đúng giữa hai trụ cổng Isometric 30 độ
-    const wingW = 74 * init.scale;
-    const wingH = 104 * init.scale;
-    const gateLeftX = init.x + 1116 * init.scale;
-    const gateRightX = init.x + 1188 * init.scale;
-    const gateLeftY = init.y + 1312 * init.scale;
-    const gateRightY = init.y + 1353 * init.scale;
-
-    if (gateLeafLeft && gateLeafRight) {
-      gateLeafLeft.style.width = `${wingW}px`;
-      gateLeafLeft.style.height = `${wingH}px`;
-      gsap.set(gateLeafLeft, {
-        x: gateLeftX,
-        y: gateLeftY,
-        skewY: 30,
-        scale: 1,
-        autoAlpha: 1,
-        transformOrigin: "0 0",
+    // Ẩn tất cả thẻ trừ thẻ đầu tiên
+    Object.entries(cardsMap).forEach(([k, el]) => {
+      if (!el) return;
+      gsap.set(el, {
+        autoAlpha: k === "gate" ? 1 : 0,
+        scale: k === "gate" ? 1 : 0.96,
+        pointerEvents: k === "gate" ? "auto" : "none",
       });
+    });
 
-      gateLeafRight.style.width = `${wingW}px`;
-      gateLeafRight.style.height = `${wingH}px`;
-      gsap.set(gateLeafRight, {
-        x: gateRightX,
-        y: gateRightY,
-        skewY: 30,
-        scale: 1,
-        autoAlpha: 1,
-        transformOrigin: "0 0",
+    gsap.set([panelGallery, panelTeachers, panelContact], {
+      autoAlpha: 0,
+      scale: 0.96,
+      pointerEvents: "none",
+    });
+    if (epilogueVineLayer) gsap.set(epilogueVineLayer, { autoAlpha: 0 });
+    if (skyBackdrop) {
+      gsap.set(skyBackdrop, {
+        background: "linear-gradient(180deg, #FCF9F4 0%, #FBF3E7 58%, #F5EBDE 100%)",
       });
     }
 
-    gsap.set([facadeCurtain, outerWalls, gatePillars, gateSignGroup], { autoAlpha: 1, y: 0 });
-    if (greenCurtains) gsap.set(greenCurtains, { autoAlpha: 0.98, scaleY: 1, transformOrigin: "50% 0%" });
-
     if (prefersReducedMotion) {
-      stops.forEach((stop) => {
+      const allSteps = [...stops.map((s) => s.key), "gallery", "teachers", "contact"];
+      allSteps.forEach((stepKey, idx) => {
         ScrollTrigger.create({
-          trigger: stop.trigger,
-          start: "top 55%",
-          end: "bottom 45%",
-          onEnter: () => {
-            gsap.set([svgLayerHost, svgGuideHost], { x: stop.cam.x, y: stop.cam.y, scale: stop.cam.scale });
-            gsap.set(facadeCurtain, { autoAlpha: stop.id === "gate" ? 1 : 0 });
-            if (gateLeafLeft && gateLeafRight) {
-              gsap.set([gateLeafLeft, gateLeafRight], { autoAlpha: stop.id === "gate" ? 1 : 0 });
+          trigger: `#step-${stepKey}`,
+          start: "top 60%",
+          end: "bottom 40%",
+          onToggle: (self) => {
+            if (!self.isActive) return;
+            const isEpi = ["gallery", "teachers", "contact"].includes(stepKey);
+            gsap.set(stageCanvas, { autoAlpha: isEpi ? 0 : 1 });
+            if (!isEpi && stops[idx]) {
+              const c = stops[idx].cam;
+              gsap.set([svgLayerHost, svgGuideHost], { x: c.x, y: c.y, scale: c.scale });
+              const open = idx > 0;
+              gsap.set(gateLeafLeft, { x: open ? -92 * COS30 : 0, y: open ? -92 * SIN30 : 0 });
+              gsap.set(gateLeafRight, { x: open ? 92 * COS30 : 0, y: open ? 92 * SIN30 : 0 });
+              if (facadeCurtain) gsap.set(facadeCurtain, { opacity: open ? 0.3 : 1 });
             }
-            onChapterChange(stop.id.startsWith("floor2") ? "floor2" : stop.id);
-          },
-          onEnterBack: () => {
-            gsap.set([svgLayerHost, svgGuideHost], { x: stop.cam.x, y: stop.cam.y, scale: stop.cam.scale });
-            gsap.set(facadeCurtain, { autoAlpha: stop.id === "gate" ? 1 : 0 });
-            if (gateLeafLeft && gateLeafRight) {
-              gsap.set([gateLeafLeft, gateLeafRight], { autoAlpha: stop.id === "gate" ? 1 : 0 });
-            }
-            onChapterChange(stop.id.startsWith("floor2") ? "floor2" : stop.id);
+            Object.entries(cardsMap).forEach(([k, el]) => {
+              if (!el) return;
+              gsap.set(el, { autoAlpha: k === stepKey ? 1 : 0, pointerEvents: k === stepKey ? "auto" : "none" });
+            });
+            [panelGallery, panelTeachers, panelContact].forEach((p) => {
+              if (!p) return;
+              const match = p.getAttribute("data-epilogue-panel") === stepKey;
+              gsap.set(p, { autoAlpha: match ? 1 : 0, pointerEvents: match ? "auto" : "none" });
+            });
+            setActiveRoomBadges(stepKey, true);
+            onChapterChange(stepKey);
           },
         });
       });
       return;
     }
 
-    // Kịch bản Scrub liền mạch từng cặp chặng
+    // MỘT TIMELINE DUY NHẤT ĐỒNG BỘ TOÀN BỘ 11 ĐIỂM DỪNG (0 -> 10)
+    // Mỗi đoạn có nhịp chuyển (0.55) và nhịp dừng đọc êm (0.45)
+    const master = gsap.timeline({
+      scrollTrigger: {
+        trigger: "#master-scroll-track",
+        start: "top top",
+        end: "bottom bottom",
+        scrub: 0.75,
+        invalidateOnRefresh: true,
+        onUpdate: (self) => {
+          const p = self.progress;
+          // Đường nét dẫn chuyện đi hết ở 70% hành trình (khi kết thúc Lầu 2)
+          const campusP = Math.min(1, p / 0.72);
+          if (storyPath && pathLength > 0) {
+            storyPath.style.strokeDashoffset = `${pathLength * (1 - campusP)}`;
+            if (floatingLotus) {
+              const pt = storyPath.getPointAtLength(campusP * pathLength);
+              floatingLotus.setAttribute("transform", `translate(${pt.x.toFixed(1)}, ${pt.y.toFixed(1)})`);
+            }
+          }
+        },
+      },
+    });
+
+    // Bước 0 -> 7: Di chuyển bản đồ Isometric & crossfade thẻ tại chỗ
     for (let i = 0; i < stops.length - 1; i++) {
       const from = stops[i];
       const to = stops[i + 1];
+      const tStart = i + 0.35; // Cho phép người dùng đứng đọc ở bước i trước khi chuyển sang i+1
 
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: to.trigger,
-          start: triggerStart,
-          end: triggerEnd,
-          scrub: 0.9,
-          invalidateOnRefresh: true,
-        },
-      });
-
-      tl.fromTo(
+      // Camera trượt mượt
+      master.to(
         [svgLayerHost, svgGuideHost],
-        { x: from.cam.x, y: from.cam.y, scale: from.cam.scale },
-        { x: to.cam.x, y: to.cam.y, scale: to.cam.scale, ease: "power1.inOut", immediateRender: false },
-        0
+        { x: to.cam.x, y: to.cam.y, scale: to.cam.scale, duration: 0.65, ease: "power1.inOut" },
+        tStart
       );
 
       if (skyLayer) {
-        tl.fromTo(
+        master.to(
           skyLayer,
-          { x: (from.raw.x - 1185) * 0.18 * parallaxStrength, y: (from.raw.y - 1320) * 0.12 * parallaxStrength },
-          { x: (to.raw.x - 1185) * 0.18 * parallaxStrength, y: (to.raw.y - 1320) * 0.12 * parallaxStrength, ease: "none", immediateRender: false },
-          0
-        );
-      }
-
-      if (verandaForeground) {
-        tl.fromTo(
-          verandaForeground,
-          { x: -(from.raw.x - 1185) * 0.04 * parallaxStrength },
-          { x: -(to.raw.x - 1185) * 0.04 * parallaxStrength, ease: "none", immediateRender: false },
-          0
-        );
-      }
-
-      if (floor2Trim) {
-        tl.fromTo(
-          floor2Trim,
-          { x: -(from.raw.x - 1800) * 0.04 * parallaxStrength },
-          { x: -(to.raw.x - 1800) * 0.04 * parallaxStrength, ease: "none", immediateRender: false },
-          0
-        );
-      }
-
-      // CHẶNG 1 -> CHẶNG 2: Hai cánh cửa cổng mở dần đối xứng sang hai bên khung hình (KHÔNG biến mất, KHÔNG trượt dồn sang phải!)
-      if (from.id === "gate" && to.id === "veranda-kitchen") {
-        if (gateLeafLeft && gateLeafRight) {
-          const openScale = 1.65;
-          const openW = wingW * openScale;
-          const openY = Math.max(84, vh * 0.48 - (wingH * openScale) * 0.5);
-          const openLeftX = -openW * 0.18;
-          const openRightX = vw - openW * 0.82;
-          tl.fromTo(
-            gateLeafLeft,
-            { x: gateLeftX, y: gateLeftY, skewY: 30, scale: 1, autoAlpha: 1 },
-            { x: openLeftX, y: openY, skewY: 0, scale: openScale, autoAlpha: 1, ease: "power2.inOut", immediateRender: false },
-            0
-          );
-          tl.fromTo(
-            gateLeafRight,
-            { x: gateRightX, y: gateRightY, skewY: 30, scale: 1, autoAlpha: 1 },
-            { x: openRightX, y: openY, skewY: 0, scale: openScale, autoAlpha: 1, ease: "power2.inOut", immediateRender: false },
-            0
-          );
-        }
-
-        if (greenCurtains) {
-          tl.fromTo(
-            greenCurtains,
-            { scaleY: 1, autoAlpha: 0.92 },
-            { scaleY: 0.1, autoAlpha: 0, ease: "power2.inOut", immediateRender: false },
-            0.08
-          );
-        }
-
-        tl.fromTo(
-          [outerWalls, gatePillars, gateSignGroup],
-          { autoAlpha: 1, y: 0 },
-          { autoAlpha: 0, y: 40, ease: "power2.inOut", immediateRender: false },
-          0.2
-        );
-      }
-
-      // CHẶNG 2 -> CHẶNG 3 (Vào Sân chơi chính): Hai cánh cổng tiếp tục mở thoát ra ngoài hai mép màn hình một cách tự nhiên
-      if (from.id === "veranda-kitchen" && to.id === "playground" && gateLeafLeft && gateLeafRight) {
-        const openScale = 1.65;
-        const openW = wingW * openScale;
-        const openLeftX = -openW * 0.18;
-        const openRightX = vw - openW * 0.82;
-        tl.fromTo(
-          gateLeafLeft,
-          { x: openLeftX, autoAlpha: 1 },
-          { x: -openW - 40, autoAlpha: 1, ease: "power1.in", immediateRender: false },
-          0
-        );
-        tl.fromTo(
-          gateLeafRight,
-          { x: openRightX, autoAlpha: 1 },
-          { x: vw + 40, autoAlpha: 1, ease: "power1.in", immediateRender: false },
-          0
-        );
-      }
-    }
-
-    // Đèn ấm dịu bật sáng khi ghé từng lớp học
-    const lampTriggers = [
-      { el: lamps.nt, trigger: '[data-chapter="nursery"]' },
-      { el: lamps.mgb, trigger: '[data-chapter="preschool-small"]' },
-      { el: lamps.mgn, trigger: "#floor2-stop-nho" },
-      { el: lamps.mgl, trigger: "#floor2-stop-lon" },
-    ];
-    lampTriggers.forEach(({ el, trigger }) => {
-      if (!el) return;
-      gsap.fromTo(
-        el,
-        { opacity: 0.18 },
-        {
-          opacity: 0.92,
-          ease: "power2.out",
-          scrollTrigger: {
-            trigger,
-            start: "top 68%",
-            end: "center 48%",
-            scrub: 0.6,
+          {
+            x: (to.raw.x - 1185) * 0.16 * parallaxStrength,
+            y: (to.raw.y - 1320) * 0.1 * parallaxStrength,
+            duration: 0.65,
+            ease: "none",
           },
-        }
-      );
-    });
+          tStart
+        );
+      }
 
-    // Đường nét & cánh hoa sen trôi dọc hành trình kiến trúc
-    if (storyPath && pathLength > 0) {
-      ScrollTrigger.create({
-        trigger: "#story-track",
-        start: "top top",
-        end: "bottom bottom",
-        scrub: 0.6,
-        onUpdate: (self) => {
-          const p = self.progress;
-          storyPath.style.strokeDashoffset = `${pathLength * (1 - p)}`;
-          if (floatingLotus) {
-            const pt = storyPath.getPointAtLength(p * pathLength);
-            const nextPt = storyPath.getPointAtLength(Math.min(pathLength, p * pathLength + 6));
-            const angle = (Math.atan2(nextPt.y - pt.y, nextPt.x - pt.x) * 180) / Math.PI + 90;
-            floatingLotus.setAttribute("transform", `translate(${pt.x.toFixed(1)}, ${pt.y.toFixed(1)}) rotate(${angle.toFixed(1)})`);
+      // Thẻ cũ tan nhẹ tại chỗ, thẻ mới hiện lên tại chỗ (KHÔNG trượt lên xuống!)
+      const fromCard = cardsMap[from.key];
+      const toCard = cardsMap[to.key];
+      if (fromCard) {
+        master.to(
+          fromCard,
+          { autoAlpha: 0, scale: 0.96, pointerEvents: "none", duration: 0.28, ease: "power1.in" },
+          tStart
+        );
+      }
+      if (toCard) {
+        master.fromTo(
+          toCard,
+          { autoAlpha: 0, scale: 0.96, pointerEvents: "none" },
+          { autoAlpha: 1, scale: 1, pointerEvents: "auto", duration: 0.32, ease: "power2.out" },
+          tStart + 0.32
+        );
+      }
+
+      // CHẶNG 1 -> CHẶNG 2:
+      // 1) Con trỏ vừa xuất phát là 2 cánh cổng trượt mở ngay lập tức theo đúng góc 30° về 2 bên trụ
+      // 2) Khi con trỏ đi qua cổng vào bên trong, khu vực cổng & hàng rào mờ dần còn 30% để nhìn xuyên vào hành lang
+      if (from.key === "gate" && to.key === "veranda-kitchen") {
+        master.to(
+          gateLeafLeft,
+          { x: -92 * COS30, y: -92 * SIN30, duration: 0.3, ease: "power2.out" },
+          0.04
+        );
+        master.to(
+          gateLeafRight,
+          { x: 92 * COS30, y: 92 * SIN30, duration: 0.3, ease: "power2.out" },
+          0.04
+        );
+        if (facadeCurtain) {
+          master.to(
+            facadeCurtain,
+            { opacity: 0.3, duration: 0.36, ease: "power1.inOut" },
+            tStart + 0.08
+          );
+        }
+      }
+
+      // Bật ánh sáng đèn ấm dịu khi vào các lớp học
+      const lampMap = {
+        nursery: lamps.nt,
+        "preschool-small": lamps.mgb,
+        "floor2-nho": lamps.mgn,
+        "floor2-lon": lamps.mgl,
+      };
+      if (lampMap[to.key]) {
+        master.to(lampMap[to.key], { opacity: 0.92, duration: 0.4 }, tStart + 0.2);
+      }
+      if (lampMap[from.key]) {
+        master.to(lampMap[from.key], { opacity: 0.22, duration: 0.35 }, tStart);
+      }
+
+      // Nhãn phòng: thu gọn phòng cũ về icon tròn, mở rộng viên nhộng tên đầy đủ (icon & chữ căn giữa) khi tới phòng mới
+      roomBadges.forEach(({ step, fullWidth, iconX, rect, icon, text }) => {
+        if (step === from.key) {
+          if (text) master.to(text, { autoAlpha: 0, x: -6, duration: 0.16, ease: "power1.in" }, tStart);
+          if (rect) master.to(rect, { attr: { x: -19, width: 38 }, duration: 0.26, ease: "power2.inOut" }, tStart + 0.04);
+          if (icon) master.to(icon, { x: 0, duration: 0.26, ease: "power2.inOut" }, tStart + 0.04);
+        } else if (step === to.key) {
+          if (rect) {
+            master.to(
+              rect,
+              { attr: { x: -fullWidth / 2, width: fullWidth }, duration: 0.34, ease: "back.out(1.2)" },
+              tStart + 0.26
+            );
           }
-          if (petalA) {
-            petalA.setAttribute("transform", `translate(${1110 + p * 360}, ${1360 - Math.sin(p * 8) * 35}) rotate(${p * 120})`);
+          if (icon) {
+            master.to(icon, { x: iconX, duration: 0.34, ease: "power2.out" }, tStart + 0.26);
           }
-          if (petalB) {
-            petalB.setAttribute("transform", `translate(${2420 - p * 260}, ${960 - p * 280}) rotate(${-p * 150})`);
+          if (text) {
+            master.to(text, { autoAlpha: 1, x: 0, duration: 0.24, ease: "power2.out" }, tStart + 0.38);
           }
-        },
+        }
       });
     }
+
+    // CHẶNG 7 (Lầu 2) -> CHẶNG 8 (Khoảnh khắc): Chuyển cảnh mượt mà tại chỗ (KHÔNG kéo lên xuống!)
+    const tToGallery = 7.35;
+    master
+      .to(cardsMap["floor2-lon"], { autoAlpha: 0, scale: 0.95, pointerEvents: "none", duration: 0.3, ease: "power1.in" }, tToGallery)
+      .to(stageCanvas, { autoAlpha: 0, scale: 0.9, duration: 0.52, ease: "power2.inOut" }, tToGallery)
+      .to(epilogueVineLayer, { autoAlpha: 1, duration: 0.45, ease: "power1.out" }, tToGallery + 0.15)
+      .fromTo(
+        panelGallery,
+        { autoAlpha: 0, scale: 0.95, pointerEvents: "none" },
+        { autoAlpha: 1, scale: 1, pointerEvents: "auto", duration: 0.42, ease: "power2.out" },
+        tToGallery + 0.25
+      );
+
+    // CHẶNG 8 (Khoảnh khắc) -> CHẶNG 9 (Giáo viên): Tan mượt trong cùng sân khấu
+    const tToTeachers = 8.35;
+    master
+      .to(panelGallery, { autoAlpha: 0, scale: 0.95, pointerEvents: "none", duration: 0.32, ease: "power1.inOut" }, tToTeachers)
+      .fromTo(
+        panelTeachers,
+        { autoAlpha: 0, scale: 0.95, pointerEvents: "none" },
+        { autoAlpha: 1, scale: 1, pointerEvents: "auto", duration: 0.38, ease: "power2.out" },
+        tToTeachers + 0.26
+      );
+    if (skyBackdrop) {
+      master.to(
+        skyBackdrop,
+        { background: "linear-gradient(180deg, #F6FAF6 0%, #EAF4ED 58%, #F4EFE6 100%)", duration: 0.45 },
+        tToTeachers
+      );
+    }
+
+    // CHẶNG 9 (Giáo viên) -> CHẶNG 10 (Liên hệ): Chuyển tiếp mượt sang Bưu thiếp chiều nắng ấm
+    const tToContact = 9.35;
+    master
+      .to(panelTeachers, { autoAlpha: 0, scale: 0.95, pointerEvents: "none", duration: 0.32, ease: "power1.inOut" }, tToContact)
+      .fromTo(
+        panelContact,
+        { autoAlpha: 0, scale: 0.95, pointerEvents: "none" },
+        { autoAlpha: 1, scale: 1, pointerEvents: "auto", duration: 0.38, ease: "power2.out" },
+        tToContact + 0.26
+      );
+    if (skyBackdrop) {
+      master.to(
+        skyBackdrop,
+        { background: "linear-gradient(180deg, #FDF6EE 0%, #FAE8D6 62%, #F6DEC5 100%)", duration: 0.45 },
+        tToContact
+      );
+    }
+
+    // Neo điểm cuối nhẹ nhàng để trang kết thúc ổn định
+    master.to({}, { duration: 0.35 }, 9.75);
   }
 
-  // KỊCH BẢN CHUYỂN CẢNH THỐNG NHẤT CHO 3 PHẦN CUỐI (KHOẢNH KHẮC -> GIÁO VIÊN -> LIÊN HỆ)
+  // Thiết lập cho 3 nhóm màn hình qua gsap.matchMedia()
   mm.add("(min-width: 1024px)", () => {
-    buildStageTimeline("desktop", 760, 1, "top 88%", "top 28%");
+    buildMasterTimeline("desktop", 760, 1, false);
 
-    // Subtle Mouse Parallax trên PC
-    let cleanupMouse = () => {};
     if (!prefersReducedMotion && stageViewport) {
-      const stageCanvas = document.getElementById("stage-canvas");
       const skyX = gsap.quickTo(skyLayer, "xPercent", { duration: 0.7, ease: "power2.out" });
       const skyY = gsap.quickTo(skyLayer, "yPercent", { duration: 0.7, ease: "power2.out" });
-      const canvasX = gsap.quickTo(stageCanvas, "x", { duration: 0.6, ease: "power2.out" });
-      const canvasY = gsap.quickTo(stageCanvas, "y", { duration: 0.6, ease: "power2.out" });
-
       const handleMouseMove = (e) => {
         const nx = e.clientX / window.innerWidth - 0.5;
         const ny = e.clientY / window.innerHeight - 0.5;
-        skyX(-nx * 1.4);
-        skyY(-ny * 1.1);
-        canvasX(-nx * 14);
-        canvasY(-ny * 9);
+        skyX(-nx * 1.2);
+        skyY(-ny * 0.9);
       };
       window.addEventListener("mousemove", handleMouseMove, { passive: true });
-      cleanupMouse = () => window.removeEventListener("mousemove", handleMouseMove);
+      return () => window.removeEventListener("mousemove", handleMouseMove);
     }
-
-    // Chuyển cảnh thống nhất trên sân khấu ghim Desktop cho Chặng 8 -> 9 -> 10
-    if (panelGallery && panelTeachers && panelContact) {
-      if (prefersReducedMotion) {
-        gsap.set(panelGallery, { autoAlpha: 1, y: 0, pointerEvents: "auto" });
-        gsap.set([panelTeachers, panelContact], { autoAlpha: 0, pointerEvents: "none" });
-        ScrollTrigger.create({
-          trigger: "#trigger-gallery",
-          start: "top 60%",
-          end: "bottom 40%",
-          onEnter: () => {
-            gsap.set(panelGallery, { autoAlpha: 1, pointerEvents: "auto" });
-            gsap.set([panelTeachers, panelContact], { autoAlpha: 0, pointerEvents: "none" });
-            onChapterChange("gallery");
-          },
-          onEnterBack: () => {
-            gsap.set(panelGallery, { autoAlpha: 1, pointerEvents: "auto" });
-            gsap.set([panelTeachers, panelContact], { autoAlpha: 0, pointerEvents: "none" });
-            onChapterChange("gallery");
-          },
-        });
-        ScrollTrigger.create({
-          trigger: "#trigger-teachers",
-          start: "top 60%",
-          end: "bottom 40%",
-          onEnter: () => {
-            gsap.set(panelTeachers, { autoAlpha: 1, pointerEvents: "auto" });
-            gsap.set([panelGallery, panelContact], { autoAlpha: 0, pointerEvents: "none" });
-            onChapterChange("teachers");
-          },
-          onEnterBack: () => {
-            gsap.set(panelTeachers, { autoAlpha: 1, pointerEvents: "auto" });
-            gsap.set([panelGallery, panelContact], { autoAlpha: 0, pointerEvents: "none" });
-            onChapterChange("teachers");
-          },
-        });
-        ScrollTrigger.create({
-          trigger: "#trigger-contact",
-          start: "top 60%",
-          end: "bottom 40%",
-          onEnter: () => {
-            gsap.set(panelContact, { autoAlpha: 1, pointerEvents: "auto" });
-            gsap.set([panelGallery, panelTeachers], { autoAlpha: 0, pointerEvents: "none" });
-            onChapterChange("contact");
-          },
-          onEnterBack: () => {
-            gsap.set(panelContact, { autoAlpha: 1, pointerEvents: "auto" });
-            gsap.set([panelGallery, panelTeachers], { autoAlpha: 0, pointerEvents: "none" });
-            onChapterChange("contact");
-          },
-        });
-      } else {
-        // Trạng thái đầu của Epilogue: Khoảnh khắc sẵn sàng hiện lên êm ái khi rời Lầu 2
-        gsap.set(panelGallery, { autoAlpha: 0, y: 65, scale: 0.96, pointerEvents: "none" });
-        gsap.set(panelTeachers, { autoAlpha: 0, y: 65, scale: 0.96, pointerEvents: "none" });
-        gsap.set(panelContact, { autoAlpha: 0, y: 65, scale: 0.96, pointerEvents: "none" });
-
-        // Timeline thống nhất duy nhất điều phối Khoảnh khắc -> Giáo viên -> Liên hệ (không xung đột tween)
-        const epilogueMaster = gsap.timeline({
-          scrollTrigger: {
-            trigger: "#epilogue-scroll-triggers",
-            start: "top 95%",
-            end: "bottom bottom",
-            scrub: 0.85,
-          },
-        });
-
-        // Pha 1 (0.00 -> 0.20): Hiện Khoảnh khắc treo ngẫu nhiên
-        epilogueMaster
-          .to(panelGallery, { autoAlpha: 1, y: 0, scale: 1, pointerEvents: "auto", duration: 0.2, ease: "power2.out" }, 0)
-          // Pha 2 (0.20 -> 0.36): Dừng nhẹ ngắm Khoảnh khắc
-          .to(panelGallery, { y: 0, duration: 0.16 }, 0.2)
-          // Pha 3 (0.36 -> 0.56): Khoảnh khắc tan lên, Vườn Giáo viên nở vào
-          .to(panelGallery, { autoAlpha: 0, y: -55, scale: 0.96, pointerEvents: "none", duration: 0.18, ease: "power1.inOut" }, 0.36)
-          .to(panelTeachers, { autoAlpha: 1, y: 0, scale: 1, pointerEvents: "auto", duration: 0.2, ease: "power2.out" }, 0.4)
-          // Pha 4 (0.60 -> 0.72): Dừng nhẹ ngắm Vườn Giáo viên
-          .to(panelTeachers, { y: 0, duration: 0.12 }, 0.6)
-          // Pha 5 (0.72 -> 0.94): Giáo viên tan lên, Bưu thiếp chiều nắng ấm Liên hệ trượt vào
-          .to(panelTeachers, { autoAlpha: 0, y: -55, scale: 0.96, pointerEvents: "none", duration: 0.18, ease: "power1.inOut" }, 0.72)
-          .to(panelContact, { autoAlpha: 1, y: 0, scale: 1, pointerEvents: "auto", duration: 0.22, ease: "power2.out" }, 0.76);
-
-        if (epilogueSky) {
-          epilogueMaster
-            .to(
-              epilogueSky,
-              { background: "linear-gradient(180deg, #F6FAF6 0%, #EAF4ED 58%, #F4EFE6 100%)", duration: 0.22 },
-              0.36
-            )
-            .to(
-              epilogueSky,
-              { background: "linear-gradient(180deg, #FDF6EE 0%, #FAE8D6 62%, #F6DEC5 100%)", duration: 0.22 },
-              0.72
-            );
-        }
-      }
-    }
-
-    return () => {
-      cleanupMouse();
-      gsap.set([panelGallery, panelTeachers, panelContact], { clearProps: "all" });
-    };
   });
 
-  // Tablet & Mobile: Chuyển cảnh Scrub mềm mại liên kết 3 phần cuối không đứt gãy
   mm.add("(min-width: 768px) and (max-width: 1023px)", () => {
-    buildStageTimeline("tablet", 700, 0.55, "top 95%", "top 53%");
-    if (!prefersReducedMotion) {
-      [panelGallery, panelTeachers, panelContact].forEach((panel) => {
-        if (!panel) return;
-        gsap.fromTo(
-          panel,
-          { y: 42, opacity: 0.15 },
-          {
-            y: 0,
-            opacity: 1,
-            ease: "power2.out",
-            scrollTrigger: {
-              trigger: panel,
-              start: "top 92%",
-              end: "top 48%",
-              scrub: 0.7,
-            },
-          }
-        );
-      });
-    }
+    buildMasterTimeline("tablet", 640, 0.5, true);
   });
 
   mm.add("(max-width: 767px)", () => {
-    buildStageTimeline("mobile", 670, 0.35, "top 95%", "top 52%");
-    if (!prefersReducedMotion) {
-      [panelGallery, panelTeachers, panelContact].forEach((panel) => {
-        if (!panel) return;
-        gsap.fromTo(
-          panel,
-          { y: 36, opacity: 0.2 },
-          {
-            y: 0,
-            opacity: 1,
-            ease: "power2.out",
-            scrollTrigger: {
-              trigger: panel,
-              start: "top 92%",
-              end: "top 52%",
-              scrub: 0.7,
-            },
-          }
-        );
-      });
-    }
+    buildMasterTimeline("mobile", 580, 0.3, true);
   });
 
-  // Theo dõi trạng thái đang xem của toàn bộ 10 chặng
-  const stageChapters = document.querySelectorAll(".story-chapter[data-chapter]");
-  stageChapters.forEach((chapterEl) => {
-    const chId = chapterEl.getAttribute("data-chapter");
+  // Cập nhật active dot trên thanh định vị & pill Mobile theo từng slot trên đường ray
+  document.querySelectorAll(".scroll-step-slot").forEach((slotEl) => {
+    const chId = slotEl.getAttribute("data-chapter");
     ScrollTrigger.create({
-      trigger: chapterEl,
-      start: "top 68%",
-      end: "bottom 32%",
+      trigger: slotEl,
+      start: "top 55%",
+      end: "bottom 45%",
       onEnter: () => onChapterChange(chId),
       onEnterBack: () => onChapterChange(chId),
     });
   });
 
-  // Theo dõi active state cho 3 cảnh cuối tùy theo Desktop vs Tablet/Mobile
-  mm.add("(min-width: 1024px)", () => {
-    ["gallery", "teachers", "contact"].forEach((id) => {
-      ScrollTrigger.create({
-        trigger: `#trigger-${id}`,
-        start: "top 65%",
-        end: "bottom 35%",
-        onEnter: () => onChapterChange(id),
-        onEnterBack: () => onChapterChange(id),
-      });
-    });
-  });
-
-  mm.add("(max-width: 1023px)", () => {
-    ["gallery", "teachers", "contact"].forEach((id) => {
-      ScrollTrigger.create({
-        trigger: `#panel-${id}`,
-        start: "top 65%",
-        end: "bottom 35%",
-        onEnter: () => onChapterChange(id),
-        onEnterBack: () => onChapterChange(id),
-      });
-    });
-  });
-
-  // Đường dây dẫn chuyện nối Khoảnh khắc -> Giáo viên -> Liên hệ
-  if (!prefersReducedMotion) {
-    const epilogueVine = document.getElementById("epilogue-vine-path");
-    if (epilogueVine && typeof epilogueVine.getTotalLength === "function") {
-      const vineLen = epilogueVine.getTotalLength();
-      gsap.set(epilogueVine, { strokeDasharray: vineLen, strokeDashoffset: vineLen });
-      gsap.to(epilogueVine, {
-        strokeDashoffset: 0,
-        ease: "none",
-        scrollTrigger: {
-          trigger: "#epilogue-journey",
-          start: "top 80%",
-          end: "bottom 85%",
-          scrub: 0.9,
-        },
-      });
-    }
-  }
-
   return {
     scrollToTarget(target) {
-      const targetEl = resolveScrollTarget(target);
-      if (!targetEl) return;
+      const slot = resolveStepSlot(target);
+      if (!slot) return;
+      // Đặt vị trí cuộn vào giữa đoạn dừng của slot để thẻ & cảnh khớp 100%
+      const rectTop = slot.offsetTop;
+      const offsetY = target === "gate" ? 0 : slot.offsetHeight * 0.36;
+      const destY = Math.max(0, rectTop + offsetY);
       if (lenis) {
-        lenis.scrollTo(targetEl, { offset: -10 });
+        lenis.scrollTo(destY);
       } else {
-        targetEl.scrollIntoView({ behavior: prefersReducedMotion ? "auto" : "smooth" });
+        window.scrollTo({ top: destY, behavior: prefersReducedMotion ? "auto" : "smooth" });
       }
     },
   };

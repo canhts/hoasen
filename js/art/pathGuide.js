@@ -8,23 +8,22 @@ import { iso } from "./scenes.js";
 
 /**
  * Đường dẫn chuyện liên kết toàn bộ bản đồ Isometric 30 độ theo đúng hành trình:
- * Cổng -> Văn phòng (Camera 24/7) -> Kho -> Thực đơn -> Bếp -> Sân chơi chính -> Nhà trẻ -> Mẫu giáo bé -> Cầu thang -> Lầu 2 -> Khoảnh khắc
+ * Cổng -> Văn phòng (Camera 24/7) -> Kho -> Bếp nấu chữ L -> Sân chơi chính -> Nhà trẻ -> Mẫu giáo bé -> Cầu thang -> Lầu 2 -> Khoảnh khắc
  */
 export function renderCampusGuideSvg(hostEl) {
   const pts = [
     iso(1120, 785, 4),
     iso(1120, 625, 4),
-    iso(1465, 625, 4),
-    iso(1825, 625, 4),
+    iso(1515, 635, 4),
+    iso(1665, 655, 4),
     iso(1120, 635, 4),
     iso(240, 635, 4),
     iso(580, 625, 4),
     iso(860, 625, 4),
-    iso(1310, 345, 6),
-    iso(1310, 120, 148),
-    iso(1550, 100, 148),
-    iso(970, 100, 148),
-    iso(600, -180, 150),
+    iso(1310, 615, 6),
+    iso(1310, 158, 148),
+    iso(1550, 158, 148),
+    iso(970, 158, 148),
   ];
 
   const d = pts
@@ -73,8 +72,10 @@ export function renderCampusGuideSvg(hostEl) {
     />
 
     <g id="floating-lotus-lead" filter="url(#petalGlow)" transform="translate(${startX}, ${startY})">
-      <path d="M 0 -16 C -11 -4 -10 10 0 16 C 10 10 11 -4 0 -16 Z" fill="#E87A90"/>
-      <path d="M 0 -10 C -5 -2 -5 6 0 11 C 5 6 5 -2 0 -10 Z" fill="#F9DCE4"/>
+      <circle class="anim-cursor-ring" cx="0" cy="0" r="17" fill="#E87A90" opacity="0.28"/>
+      <circle cx="0" cy="0" r="12" fill="#FFFDF9"/>
+      <circle cx="0" cy="0" r="8.5" fill="#E87A90"/>
+      <circle cx="0" cy="0" r="3.4" fill="#FFFDF9"/>
     </g>
 
     <g id="floating-petal-a" opacity="0.85" transform="translate(${paX}, ${paY})">

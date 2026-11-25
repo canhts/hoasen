@@ -2,11 +2,9 @@
  * ============================================================================
  * BỘ VẼ SƠ ĐỒ TỔNG THỂ FLAT ISOMETRIC ILLUSTRATION (GÓC CHUẨN 30 ĐỘ)
  * ============================================================================
- * Phép chiếu Isometric chuẩn 30 độ:
- *   X(u, v) = OX + (u - v) * cos(30°)
- *   Y(u, v, z) = OY + (u + v) * sin(30°) - z
- * Phong cách tối giản dễ thương, góc bo tròn mềm mại, màu sắc trẻ thơ,
- * liên kết liền mạch toàn bộ khu vực tầng trệt & lầu 2.
+ * - Cổng 2 cánh nằm trực tiếp trong không gian 30° và đẩy ra 2 bên trụ khi mở
+ * - Bảng Nội quy, Thông báo, Biển hiệu đặt nghiêng 30° chuẩn Isometric
+ * - Hàng rào xi măng sơn nhiều màu bao trọn 3 cạnh: TRƯỚC, TRÁI, PHẢI tầng trệt
  */
 
 const COS30 = 0.8660254;
@@ -22,9 +20,6 @@ function pts(arr) {
   return arr.map(([x, y]) => `${x},${y}`).join(" ");
 }
 
-/**
- * Khối hộp 30° Flat Isometric (3 mặt sáng-trung-tối dịu mắt)
- */
 function isoBox(u, v, du, dv, z0, dz, topCol, leftCol, rightCol, extra = "") {
   const p001 = iso(u, v, z0 + dz);
   const p101 = iso(u + du, v, z0 + dz);
@@ -44,29 +39,18 @@ function isoBox(u, v, du, dv, z0, dz, topCol, leftCol, rightCol, extra = "") {
   `;
 }
 
-/**
- * Mặt sàn phẳng 30°
- */
 function isoFloor(u, v, du, dv, z, fillCol, extra = "") {
   const p = [iso(u, v, z), iso(u + du, v, z), iso(u + du, v + dv, z), iso(u, v + dv, z)];
   return `<polygon points="${pts(p)}" fill="${fillCol}" stroke="${fillCol}" stroke-width="1.5" stroke-linejoin="round" ${extra}/>`;
 }
 
-/**
- * Căn phòng Cutaway Isometric (tường hậu thấp phía sau mở thoáng góc nhìn từ trên xuống 30°)
- */
 function isoCutawayRoom(u, v, du, dv, z0, wallH, floorCol, wallBackLeftCol, wallBackRightCol, trimCol) {
   const floor = isoFloor(u, v, du, dv, z0, floorCol);
-  // Tường sau dọc cạnh v (u .. u+du)
   const backU = isoBox(u, v, du, 14, z0, wallH, trimCol, wallBackLeftCol, wallBackRightCol);
-  // Tường trái dọc cạnh u (v .. v+dv)
   const backV = isoBox(u, v, 14, dv, z0, wallH, trimCol, wallBackLeftCol, wallBackRightCol);
   return `${floor}${backU}${backV}`;
 }
 
-/**
- * Cây xanh tối giản dạng kẹo bông Isometric dễ thương
- */
 function isoCuteTree(u, v, z = 0, scale = 1) {
   const [cx, cy] = iso(u, v, z);
   const r = 34 * scale;
@@ -81,9 +65,6 @@ function isoCuteTree(u, v, z = 0, scale = 1) {
   `;
 }
 
-/**
- * Cột hồng phấn Isometric
- */
 function isoPinkPillar(u, v, z0 = 0, h = 76) {
   const [x, y] = iso(u, v, z0);
   return `
@@ -95,9 +76,6 @@ function isoPinkPillar(u, v, z0 = 0, h = 76) {
   `;
 }
 
-/**
- * Bộ bàn ghế nhỏ nhiều màu Isometric
- */
 function isoMiniTable(u, v, z0, tableCol, chairColA, chairColB) {
   return `
     <g>
@@ -109,48 +87,164 @@ function isoMiniTable(u, v, z0, tableCol, chairColA, chairColB) {
   `;
 }
 
+const FENCE_PALETTE = [
+  ["#F7D37A", "#E5BC5E", "#CFA448"],
+  ["#F08CA0", "#DC7187", "#C45D73"],
+  ["#4EB3C1", "#389FAD", "#2B8491"],
+  ["#B89FE6", "#9D82CE", "#856BB5"],
+  ["#68BD8A", "#52A877", "#3F8E61"],
+  ["#F5A48B", "#E28B72", "#C9755C"],
+];
+
 /**
- * Hàng rào xi măng được sơn màu tươi sáng theo góc 30° Isometric
+ * Hàng rào xi măng sơn nhiều màu dọc trục U (cạnh trước)
  */
-export function renderCementColorFenceIso(startU, v, count, stepU = 26, height = 44, z0 = 0) {
-  const palette = [
-    ["#F7D37A", "#E5BC5E", "#CFA448"],
-    ["#F08CA0", "#DC7187", "#C45D73"],
-    ["#4EB3C1", "#389FAD", "#2B8491"],
-    ["#B89FE6", "#9D82CE", "#856BB5"],
-    ["#68BD8A", "#52A877", "#3F8E61"],
-    ["#F5A48B", "#E28B72", "#C9755C"],
-  ];
+export function renderCementColorFenceAlongU(startU, v, count, stepU = 26, height = 42, z0 = 0) {
   const len = count * stepU;
-  // Bệ tường xi măng bên dưới + thanh giằng ngang
-  let html = isoBox(startU - 8, v - 6, len + 12, 16, z0, 16, "#F5EFE6", "#E2D7C8", "#D0C3B2");
+  let html = isoBox(startU - 6, v - 6, len + 10, 16, z0, 16, "#F5EFE6", "#E2D7C8", "#D0C3B2");
   for (let i = 0; i < count; i++) {
-    const [top, left, right] = palette[i % palette.length];
+    const [top, left, right] = FENCE_PALETTE[i % FENCE_PALETTE.length];
     const u = startU + i * stepU;
     html += isoBox(u, v - 3, 18, 12, z0 + 16, height, top, left, right);
   }
-  return `<g class="cement-color-fence-iso">${html}</g>`;
+  return `<g class="cement-color-fence-u">${html}</g>`;
 }
 
 /**
- * Nhãn tên khu vực / lớp học nổi bật ở tầng trên cùng (không bị che bởi kiến trúc)
+ * Hàng rào xi măng sơn nhiều màu dọc trục V (cạnh trái & cạnh phải tầng trệt)
  */
-function renderIsoRoomLabel(u, v, z, text, bgColor, textColor = "#FFFDF9", width = 205) {
+export function renderCementColorFenceAlongV(u, startV, count, stepV = 26, height = 42, z0 = 0) {
+  const len = count * stepV;
+  let html = isoBox(u - 6, startV - 6, 16, len + 10, z0, 16, "#F5EFE6", "#E2D7C8", "#D0C3B2");
+  for (let i = 0; i < count; i++) {
+    const [top, left, right] = FENCE_PALETTE[(i + 2) % FENCE_PALETTE.length];
+    const v = startV + i * stepV;
+    html += isoBox(u - 3, v, 12, 18, z0 + 16, height, top, left, right);
+  }
+  return `<g class="cement-color-fence-v">${html}</g>`;
+}
+
+/**
+ * Hàng rào sắt thanh mảnh bao quanh 3 cạnh Lầu 2 (dọc trục U)
+ */
+function renderIronFenceAlongU(startU, endU, v, z0 = 145, h = 34, step = 28) {
+  let html = "";
+  const count = Math.floor((endU - startU) / step);
+  for (let i = 0; i <= count; i++) {
+    const u = Math.min(endU, startU + i * step);
+    const [bx, by] = iso(u, v, z0);
+    const [tx, ty] = iso(u, v, z0 + h);
+    const isPost = i % 3 === 0 || i === count;
+    html += `<line x1="${bx}" y1="${by}" x2="${tx}" y2="${ty}" stroke="#395B64" stroke-width="${isPost ? 3.2 : 1.7}" stroke-linecap="round"/>`;
+  }
+  const [lx1, ly1] = iso(startU, v, z0 + h);
+  const [lx2, ly2] = iso(endU, v, z0 + h);
+  const [mx1, my1] = iso(startU, v, z0 + 10);
+  const [mx2, my2] = iso(endU, v, z0 + 10);
+  html += `<line x1="${mx1}" y1="${my1}" x2="${mx2}" y2="${my2}" stroke="#4E7C87" stroke-width="2" stroke-linecap="round"/>`;
+  html += `<line x1="${lx1}" y1="${ly1}" x2="${lx2}" y2="${ly2}" stroke="#2D7B87" stroke-width="3.6" stroke-linecap="round"/>`;
+  return `<g class="iron-fence-u">${html}</g>`;
+}
+
+/**
+ * Hàng rào sắt thanh mảnh dọc trục V (cạnh trái & phải Lầu 2)
+ */
+function renderIronFenceAlongV(u, startV, endV, z0 = 145, h = 34, step = 28) {
+  let html = "";
+  const count = Math.floor((endV - startV) / step);
+  for (let i = 0; i <= count; i++) {
+    const v = Math.min(endV, startV + i * step);
+    const [bx, by] = iso(u, v, z0);
+    const [tx, ty] = iso(u, v, z0 + h);
+    const isPost = i % 3 === 0 || i === count;
+    html += `<line x1="${bx}" y1="${by}" x2="${tx}" y2="${ty}" stroke="#395B64" stroke-width="${isPost ? 3.2 : 1.7}" stroke-linecap="round"/>`;
+  }
+  const [lx1, ly1] = iso(u, startV, z0 + h);
+  const [lx2, ly2] = iso(u, endV, z0 + h);
+  const [mx1, my1] = iso(u, startV, z0 + 10);
+  const [mx2, my2] = iso(u, endV, z0 + 10);
+  html += `<line x1="${mx1}" y1="${my1}" x2="${mx2}" y2="${my2}" stroke="#4E7C87" stroke-width="2" stroke-linecap="round"/>`;
+  html += `<line x1="${lx1}" y1="${ly1}" x2="${lx2}" y2="${ly2}" stroke="#2D7B87" stroke-width="3.6" stroke-linecap="round"/>`;
+  return `<g class="iron-fence-v">${html}</g>`;
+}
+
+/**
+ * Cánh cổng 30° Flat Isometric (vẽ chuẩn hệ tọa độ iso(u,v,z) để trượt đúng theo 2 trụ)
+ */
+function renderIsoGateWing(startU, endU, v, zBottom = 2, zTop = 98) {
+  const du = endU - startU;
+  const barCount = 5;
+  const step = du / barCount;
+  let bars = "";
+  // Khung ngang hồng phía dưới (đặc trưng cổng trường Hoa Sen)
+  bars += isoBox(startU + 2, v - 3, du - 4, 8, zBottom, 6, "#F29FB1", "#E87A90", "#CE6278");
+  bars += isoBox(startU + 2, v - 3, du - 4, 8, zBottom + 28, 6, "#F29FB1", "#E87A90", "#CE6278");
+  // Khung ngang xanh trên cùng
+  bars += isoBox(startU + 2, v - 3, du - 4, 8, zTop - 8, 6, "#7CD3E2", "#4EB3C1", "#389FAD");
+  // Các song sắt đứng theo góc 30°
+  for (let i = 0; i <= barCount; i++) {
+    const bu = startU + i * step - 3;
+    const isEdge = i === 0 || i === barCount;
+    const colTop = isEdge ? "#F29FB1" : "#7CD3E2";
+    const colLeft = isEdge ? "#E87A90" : "#42B2D4";
+    const colRight = isEdge ? "#CE6278" : "#2D8AA6";
+    bars += isoBox(bu, v - 2, 6, 6, zBottom, zTop - zBottom, colTop, colLeft, colRight);
+  }
+  return bars;
+}
+
+const BADGE_ICONS = {
+  playground: `<path d="M -5 5 L -5 -3 L 0 -3 L 5 5 M -6 -5 C -2 -7 2 -7 6 -5" fill="none" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>`,
+  baby: `<circle cx="0" cy="-2" r="3.4" fill="none" stroke-width="1.8"/><path d="M -5.2 5.5 C -4 2.3 4 2.3 5.2 5.5 M -1.6 -5.5 C -1 -7.2 1 -7.2 1.6 -5.5" fill="none" stroke-width="1.8" stroke-linecap="round"/>`,
+  blocks: `<rect x="-6.2" y="-1" width="5.6" height="5.6" rx="1.2" fill="none" stroke-width="1.7"/><rect x="0.6" y="-1" width="5.6" height="5.6" rx="1.2" fill="none" stroke-width="1.7"/><rect x="-2.8" y="-6.6" width="5.6" height="5.2" rx="1.2" fill="none" stroke-width="1.7"/>`,
+  camera: `<rect x="-6.2" y="-4" width="9" height="6.2" rx="1.6" fill="none" stroke-width="1.8"/><path d="M 2.8 -2 L 6.5 -4 L 6.5 2 L 2.8 0 Z M -2 2.2 L -2 5.5 M -4.5 5.5 L 1 5.5" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>`,
+  box: `<path d="M -6 -2.5 L 0 -6 L 6 -2.5 L 6 4 L 0 7 L -6 4 Z M -6 -2.5 L 0 0.8 L 6 -2.5 M 0 0.8 L 0 7" fill="none" stroke-width="1.7" stroke-linejoin="round"/>`,
+  menu: `<rect x="-5.5" y="-5.5" width="11" height="12" rx="2" fill="none" stroke-width="1.7"/><path d="M -2.5 -2 L 2.5 -2 M -2.5 1 L 2.5 1 M -2.5 4 L 1 4" fill="none" stroke-width="1.7" stroke-linecap="round"/>`,
+  pot: `<rect x="-6" y="-1.2" width="12" height="6.5" rx="2" fill="none" stroke-width="1.8"/><path d="M -7.5 -1.2 L 7.5 -1.2 M -2.5 -4.2 Q -3.5 -6 -2 -7.2 M 2 -4.2 Q 1 -6 2.5 -7.2" fill="none" stroke-width="1.6" stroke-linecap="round"/>`,
+  stairs: `<path d="M -6.5 5.5 L -2.5 5.5 L -2.5 1.8 L 1.8 1.8 L 1.8 -2 L 6 -2 L 6 -5.8" fill="none" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>`,
+  book: `<path d="M -6.5 -4.5 C -3.5 -5.5 -1 -4.5 0 -3.2 C 1 -4.5 3.5 -5.5 6.5 -4.5 L 6.5 4.8 C 3.5 3.8 1 4.8 0 5.8 C -1 4.8 -3.5 3.8 -6.5 4.8 Z M 0 -3.2 L 0 5.8" fill="none" stroke-width="1.7" stroke-linejoin="round"/>`,
+  palette: `<circle cx="0" cy="0" r="6" fill="none" stroke-width="1.7"/><circle cx="-2.2" cy="-2" r="1" fill="currentColor" stroke="none"/><circle cx="2" cy="-2" r="1" fill="currentColor" stroke="none"/><circle cx="-2" cy="2" r="1" fill="currentColor" stroke="none"/>`,
+  leaf: `<path d="M -5 5 C -5 -3 1 -6.5 6 -6 C 6 -1 3 5 -5 5 Z M -5 5 L 1.5 -1.5" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>`,
+};
+
+function renderIsoRoomLabel(u, v, z, text, bgColor, textColor = "#FFFDF9", width = 225, roomStep = "", iconKey = "leaf") {
   const [x, y] = iso(u, v, z);
+  const iconMarkup = BADGE_ICONS[iconKey] || BADGE_ICONS.leaf;
   return `
-    <g class="iso-room-badge" transform="translate(${x}, ${y})" filter="url(#badgeShadow)">
-      <line x1="0" y1="16" x2="0" y2="38" stroke="${bgColor}" stroke-width="2.5" stroke-dasharray="3 3" stroke-linecap="round"/>
+    <g
+      class="iso-room-badge"
+      data-room-step="${roomStep}"
+      data-full-width="${width}"
+      transform="translate(${x}, ${y})"
+      filter="url(#badgeShadow)"
+    >
+      <line x1="0" y1="18" x2="0" y2="38" stroke="${bgColor}" stroke-width="2.5" stroke-dasharray="3 3" stroke-linecap="round"/>
       <circle cx="0" cy="40" r="4.5" fill="${bgColor}"/>
-      <rect x="${-width / 2}" y="-20" width="${width}" height="36" rx="18" fill="${bgColor}"/>
-      <text x="0" y="3" text-anchor="middle" font-family="Quicksand, sans-serif" font-size="13.5" font-weight="700" fill="${textColor}">${text}</text>
+      <rect class="iso-badge-rect" x="-19" y="-19" width="38" height="38" rx="19" fill="${bgColor}"/>
+      <g class="iso-badge-icon" stroke="${textColor}" color="${textColor}">
+        ${iconMarkup}
+      </g>
+      <text
+        class="iso-badge-text"
+        x="${-width / 2 + 38}"
+        y="4.5"
+        text-anchor="start"
+        font-family="Quicksand, sans-serif"
+        font-size="13.5"
+        font-weight="700"
+        fill="${textColor}"
+        opacity="0"
+      >${text}</text>
     </g>
   `;
 }
 
-/**
- * Dựng toàn bộ sơ đồ tổng thể 30° Flat Isometric vào container
- */
 export function renderCampusScene(hostEl) {
+  // Tọa độ chính xác cho 3 bảng đặt nghiêng 30° chuẩn Isometric áp sát hoàn toàn mặt trước khối nền (pad = 3)
+  const [nqX, nqY] = iso(717, 752, 101);
+  const [tbX, tbY] = iso(1323, 752, 101);
+  const [sbX, sbY] = iso(962, 752, 229);
+
   hostEl.innerHTML = `
   <svg
     id="campus-svg"
@@ -172,7 +266,7 @@ export function renderCampusScene(hostEl) {
       </filter>
 
       <clipPath id="isoSignLogoClip">
-        <circle cx="42" cy="48" r="26"/>
+        <circle cx="38" cy="47" r="24"/>
       </clipPath>
 
       <linearGradient id="skyWashGrad" x1="0" y1="0" x2="0" y2="1">
@@ -193,9 +287,7 @@ export function renderCampusScene(hostEl) {
       </radialGradient>
     </defs>
 
-    <!-- ===================================================================== -->
-    <!-- LỚP 1: HẬU CẢNH BẦU TRỜI & MÂY TỐI GIẢN                               -->
-    <!-- ===================================================================== -->
+    <!-- LỚP 1: HẬU CẢNH BẦU TRỜI & MÂY TỐI GIẢN -->
     <g id="layer-sky" class="parallax-layer-sky">
       <rect x="-400" y="-300" width="4000" height="2700" fill="url(#skyWashGrad)"/>
 
@@ -213,204 +305,307 @@ export function renderCampusScene(hostEl) {
       </g>
     </g>
 
-    <!-- ===================================================================== -->
-    <!-- LỚP 2: SƠ ĐỒ BẢN ĐỒ TỔNG THỂ FLAT ISOMETRIC 30°                       -->
-    <!-- ===================================================================== -->
+    <!-- LỚP 2: SƠ ĐỒ BẢN ĐỒ TỔNG THỂ FLAT ISOMETRIC 30° -->
     <g id="layer-midground" class="parallax-layer-mid">
 
-      <!-- ĐẾ ĐẢO KHUÔN VIÊN LIÊN KẾT TOÀN TRƯỜNG (z = -38 .. 0) -->
+      <!-- ĐẾ ĐẢO KHUÔN VIÊN & CON ĐƯỜNG RỘNG CHIA LÀN TRƯỚC CỔNG -->
       <g id="campus-base-island" filter="url(#paperShadow)">
-        ${isoBox(-40, -240, 2060, 1080, -38, 38, "#F4EDE2", "#E4D8C7", "#D5C6B2")}
-        <!-- Thảm sân trước nối liền từ Cổng vào các khu vực -->
-        ${isoFloor(0, 610, 1960, 180, 1, "#EFE5D8")}
-        <!-- Lối đi bộ liên kết pastel trên bản đồ -->
-        ${isoFloor(1050, 620, 140, 190, 2, "#F9E9EE")}
+        ${isoBox(-40, -240, 2060, 1020, -38, 38, "#F4EDE2", "#E4D8C7", "#D5C6B2")}
+        ${isoFloor(0, 610, 1960, 150, 1, "#EFE5D8")}
+        ${isoFloor(1050, 620, 140, 145, 2, "#F9E9EE")}
         ${isoFloor(240, 610, 1620, 56, 2, "#F5E9DC")}
       </g>
 
-      <!-- Cây xanh tròn mềm bao quanh bản đồ -->
-      <g id="campus-yard-trees">
-        ${isoCuteTree(20, 220, 0, 1.15)}
-        ${isoCuteTree(40, 680, 0, 1.0)}
-        ${isoCuteTree(320, 740, 0, 0.92)}
-        ${isoCuteTree(1950, 220, 0, 1.05)}
-        ${isoCuteTree(1960, 660, 0, 0.95)}
-        ${isoCuteTree(500, -160, 0, 1.0)}
+      <!-- CON ĐƯỜNG RỘNG CÓ VỈA HÈ, CHIA LÀN & VẠCH QUA ĐƯỜNG TRƯỚC CỔNG TRƯỜNG -->
+      <g id="front-wide-road">
+        ${isoBox(-180, 756, 2360, 12, -2, 5, "#EAE0D3", "#D8CCBC", "#C7B9A7")}
+        ${isoFloor(-180, 768, 2360, 265, -1, "#E3DCD4")}
+        ${(() => {
+          let lane = "";
+          for (let u = -120; u < 2120; u += 72) {
+            const [x1, y1] = iso(u, 898, 0);
+            const [x2, y2] = iso(u + 40, 898, 0);
+            lane += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#FFFDF9" stroke-width="5" stroke-linecap="round" opacity="0.92"/>`;
+          }
+          for (let u = 1046; u <= 1188; u += 28) {
+            lane += isoFloor(u, 782, 16, 78, 0, "#FFFDF9", 'opacity="0.82"');
+          }
+          return lane;
+        })()}
       </g>
 
-      <!-- ==================== TẦNG TRỆT (TRÁI -> PHẢI: u = 40 .. 1920) ==================== -->
-      <!-- [Sân chơi chính] — [Nhà trẻ (5-36th)] — [Mẫu giáo bé (3-4t)] — [Văn phòng] — [Kho -> Thực đơn -> Bếp] -->
+      <!-- HÀNG RÀO BÊN TRÁI TẦNG TRỆT (u = -6, v = 310 .. 752) -->
+      ${renderCementColorFenceAlongV(-6, 310, 17, 26, 40, 0)}
+
+      <!-- ==================== TẦNG TRỆT (TRÁI -> PHẢI) ==================== -->
       <g id="ground-floor-iso">
 
-        <!-- 1. SÂN CHƠI CHÍNH (u: 40..440, v: 320..640) -->
+        <!-- 1. SÂN CHƠI CHÍNH (2 CÂY XANH GẦN HÀNG RÀO + ĐÚNG 4 TRÒ CHƠI CHUẨN DÁNG) -->
         <g id="room-san-choi-chinh">
           ${isoFloor(40, 320, 400, 320, 2, "#6EC28F")}
           ${isoFloor(64, 344, 352, 272, 3, "#58B07C")}
-          <!-- Hàng rào xi măng sơn màu quanh sân chơi -->
-          ${renderCementColorFenceIso(52, 322, 14, 27, 28, 3)}
+          ${renderCementColorFenceAlongU(52, 322, 14, 27, 28, 3)}
 
-          <!-- Cầu trượt tối giản bo tròn -->
+          <!-- Chỉ 2 cây xanh mát gần hàng rào trong Sân chính -->
+          ${isoCuteTree(76, 360, 4, 0.92)}
+          ${isoCuteTree(76, 600, 4, 0.88)}
+
+          <!-- 1) CẦU TRƯỢT (thang leo phía sau, chòi mái che, máng trượt cong xuống thảm cỏ) -->
           <g id="prop-slide">
-            ${isoBox(105, 385, 58, 58, 3, 56, "#F7D37A", "#E5BC5E", "#CFA448")}
-            ${isoBox(100, 380, 68, 68, 59, 14, "#E87A90", "#CE6278", "#B64F64")}
-            <!-- Máng trượt nghiêng xuống thảm cỏ -->
-            <polygon points="${pts([iso(163, 402, 54), iso(163, 428, 54), iso(245, 428, 5), iso(245, 402, 5)])}" fill="#4DB8C6"/>
+            ${isoBox(118, 372, 42, 12, 3, 44, "#E4C193", "#CFA774", "#B8905E")}
+            ${isoBox(122, 386, 34, 8, 16, 4, "#FFFDF9", "#E5DDD0", "#D0C6B8")}
+            ${isoBox(122, 382, 34, 8, 32, 4, "#FFFDF9", "#E5DDD0", "#D0C6B8")}
+            ${isoBox(114, 392, 52, 52, 3, 52, "#F7D37A", "#E5BC5E", "#CFA448")}
+            ${isoBox(110, 388, 60, 60, 55, 14, "#E87A90", "#CE6278", "#B64F64")}
+            <polygon points="${pts([iso(166, 404, 52), iso(166, 432, 52), iso(248, 432, 6), iso(248, 404, 6)])}" fill="#4DB8C6"/>
+            <polygon points="${pts([iso(166, 432, 52), iso(248, 432, 6), iso(248, 432, 3), iso(166, 432, 47)])}" fill="#2E97A6"/>
+            <line x1="${iso(166, 404, 56)[0]}" y1="${iso(166, 404, 56)[1]}" x2="${iso(248, 404, 10)[0]}" y2="${iso(248, 404, 10)[1]}" stroke="#F29FB1" stroke-width="3.5" stroke-linecap="round"/>
+            <line x1="${iso(166, 432, 56)[0]}" y1="${iso(166, 432, 56)[1]}" x2="${iso(248, 432, 10)[0]}" y2="${iso(248, 432, 10)[1]}" stroke="#F29FB1" stroke-width="3.5" stroke-linecap="round"/>
           </g>
 
-          <!-- Xích đu tối giản dễ thương -->
+          <!-- 2) XÍCH ĐU (khung chữ A, thanh ngang, dây treo rõ và 2 ghế đu) -->
           <g id="prop-swing">
-            ${isoBox(255, 380, 10, 10, 3, 66, "#4EB3C1", "#389FAD", "#2B8491")}
-            ${isoBox(335, 380, 10, 10, 3, 66, "#4EB3C1", "#389FAD", "#2B8491")}
-            ${isoBox(255, 380, 90, 10, 69, 9, "#E87A90", "#CE6278", "#B64F64")}
-            <g class="anim-swing" style="transform-origin:${iso(295, 385, 69)[0]}px ${iso(295, 385, 69)[1]}px;">
-              ${isoBox(276, 382, 22, 16, 20, 6, "#F4C96B", "#DDA946", "#C79234")}
-              ${isoBox(306, 382, 22, 16, 20, 6, "#F08CA0", "#DC7187", "#C45D73")}
+            ${isoBox(264, 376, 8, 8, 3, 66, "#4EB3C1", "#389FAD", "#2B8491")}
+            ${isoBox(264, 412, 8, 8, 3, 66, "#4EB3C1", "#389FAD", "#2B8491")}
+            ${isoBox(350, 376, 8, 8, 3, 66, "#4EB3C1", "#389FAD", "#2B8491")}
+            ${isoBox(350, 412, 8, 8, 3, 66, "#4EB3C1", "#389FAD", "#2B8491")}
+            ${isoBox(262, 394, 96, 10, 69, 9, "#E87A90", "#CE6278", "#B64F64")}
+            <g class="anim-swing" style="transform-origin:${iso(310, 399, 69)[0]}px ${iso(310, 399, 69)[1]}px;">
+              <line x1="${iso(284, 399, 69)[0]}" y1="${iso(284, 399, 69)[1]}" x2="${iso(284, 399, 22)[0]}" y2="${iso(284, 399, 22)[1]}" stroke="#557A82" stroke-width="2"/>
+              <line x1="${iso(300, 399, 69)[0]}" y1="${iso(300, 399, 69)[1]}" x2="${iso(300, 399, 22)[0]}" y2="${iso(300, 399, 22)[1]}" stroke="#557A82" stroke-width="2"/>
+              <line x1="${iso(318, 399, 69)[0]}" y1="${iso(318, 399, 69)[1]}" x2="${iso(318, 399, 22)[0]}" y2="${iso(318, 399, 22)[1]}" stroke="#557A82" stroke-width="2"/>
+              <line x1="${iso(334, 399, 69)[0]}" y1="${iso(334, 399, 69)[1]}" x2="${iso(334, 399, 22)[0]}" y2="${iso(334, 399, 22)[1]}" stroke="#557A82" stroke-width="2"/>
+              ${isoBox(280, 391, 24, 16, 18, 5, "#F4C96B", "#DDA946", "#C79234")}
+              ${isoBox(314, 391, 24, 16, 18, 5, "#F08CA0", "#DC7187", "#C45D73")}
             </g>
           </g>
 
-          <!-- Vòng quay pastel -->
+          <!-- 3) VÒNG XOAY DẠNG NẰM (mâm tròn nằm thấp sát cỏ, chia múi màu và tay vịn vòng) -->
           <g id="prop-spinner">
-            ${isoFloor(140, 520, 68, 68, 4, "#F08CA0")}
-            ${isoBox(168, 548, 12, 12, 4, 26, "#4EB3C1", "#389FAD", "#2B8491")}
-            ${isoBox(152, 532, 44, 44, 30, 8, "#F7D37A", "#E5BC5E", "#CFA448")}
+            ${(() => {
+              const [cx0, cy0] = iso(176, 548, 4);
+              const [cx1, cy1] = iso(176, 548, 12);
+              const [cxTop, cyTop] = iso(176, 548, 28);
+              const spokes = [0, 60, 120, 180, 240, 300]
+                .map((deg) => {
+                  const rad = (deg * Math.PI) / 180;
+                  const u = 176 + 34 * Math.cos(rad);
+                  const v = 548 + 34 * Math.sin(rad);
+                  const [px, py] = iso(u, v, 12);
+                  return `<line x1="${cx1}" y1="${cy1}" x2="${px}" y2="${py}" stroke="#FFFDF9" stroke-width="2"/>`;
+                })
+                .join("");
+              const rails = [30, 120, 210, 300]
+                .map((deg) => {
+                  const rad = (deg * Math.PI) / 180;
+                  const u = 176 + 24 * Math.cos(rad);
+                  const v = 548 + 24 * Math.sin(rad);
+                  const [p1x, p1y] = iso(u, v, 12);
+                  const [p2x, p2y] = iso(u, v, 27);
+                  return `<line x1="${p1x}" y1="${p1y}" x2="${p2x}" y2="${p2y}" stroke="#389FAD" stroke-width="2.6" stroke-linecap="round"/>`;
+                })
+                .join("");
+              return `
+                <ellipse cx="${cx0}" cy="${cy0}" rx="46" ry="26" fill="#3C8D5F" opacity="0.28"/>
+                <ellipse cx="${cx1}" cy="${cy1 + 4}" rx="42" ry="24" fill="#CE6278"/>
+                <ellipse cx="${cx1}" cy="${cy1}" rx="42" ry="24" fill="#F7D37A"/>
+                ${spokes}
+                <ellipse cx="${cx1}" cy="${cy1}" rx="12" ry="7" fill="#E87A90"/>
+                <line x1="${cx1}" y1="${cy1}" x2="${cxTop}" y2="${cyTop}" stroke="#389FAD" stroke-width="4" stroke-linecap="round"/>
+                ${rails}
+                <ellipse cx="${cxTop}" cy="${cyTop}" rx="28" ry="16" fill="none" stroke="#389FAD" stroke-width="3.2"/>
+              `;
+            })()}
           </g>
 
-          <!-- Góc đá bóng mini -->
+          <!-- 4) BÓNG ĐÁ MINI (khung thành có lưới, vạch vôi sân & quả bóng) -->
           <g id="prop-soccer">
-            ${isoBox(310, 505, 10, 58, 3, 34, "#FFFFFF", "#E6EFF0", "#D1E2E4")}
-            ${isoBox(310, 505, 58, 8, 3, 34, "#FFFFFF", "#E6EFF0", "#D1E2E4")}
+            <polygon points="${pts([iso(270, 505, 4), iso(358, 505, 4), iso(358, 578, 4), iso(270, 578, 4)])}" fill="none" stroke="#FFFDF9" stroke-width="2.2" opacity="0.72"/>
+            ${isoBox(318, 502, 52, 58, 4, 34, "#DDF2F5", "#BFE3E8", "#A5D4DB", 'opacity="0.32"')}
+            <line x1="${iso(318, 502, 38)[0]}" y1="${iso(318, 502, 38)[1]}" x2="${iso(318, 560, 38)[0]}" y2="${iso(318, 560, 38)[1]}" stroke="#FFFDF9" stroke-width="4" stroke-linecap="round"/>
+            <line x1="${iso(318, 502, 4)[0]}" y1="${iso(318, 502, 4)[1]}" x2="${iso(318, 502, 38)[0]}" y2="${iso(318, 502, 38)[1]}" stroke="#FFFDF9" stroke-width="4" stroke-linecap="round"/>
+            <line x1="${iso(318, 560, 4)[0]}" y1="${iso(318, 560, 4)[1]}" x2="${iso(318, 560, 38)[0]}" y2="${iso(318, 560, 38)[1]}" stroke="#FFFDF9" stroke-width="4" stroke-linecap="round"/>
+            <line x1="${iso(318, 516, 38)[0]}" y1="${iso(318, 516, 38)[1]}" x2="${iso(368, 516, 34)[0]}" y2="${iso(368, 516, 34)[1]}" stroke="#FFFDF9" stroke-width="1.5" opacity="0.7"/>
+            <line x1="${iso(318, 536, 38)[0]}" y1="${iso(318, 536, 38)[1]}" x2="${iso(368, 536, 34)[0]}" y2="${iso(368, 536, 34)[1]}" stroke="#FFFDF9" stroke-width="1.5" opacity="0.7"/>
+            <line x1="${iso(368, 504, 18)[0]}" y1="${iso(368, 504, 18)[1]}" x2="${iso(368, 558, 18)[0]}" y2="${iso(368, 558, 18)[1]}" stroke="#FFFDF9" stroke-width="1.5" opacity="0.7"/>
             <g class="anim-ball">
-              <circle cx="${iso(285, 540, 12)[0]}" cy="${iso(285, 540, 12)[1]}" r="11" fill="#FFFDF9"/>
-              <circle cx="${iso(285, 540, 12)[0]}" cy="${iso(285, 540, 12)[1]}" r="4.5" fill="#2C2A29"/>
+              <circle cx="${iso(288, 540, 12)[0]}" cy="${iso(288, 540, 12)[1]}" r="10.5" fill="#FFFDF9"/>
+              <circle cx="${iso(288, 540, 12)[0]}" cy="${iso(288, 540, 12)[1]}" r="4" fill="#2C2A29"/>
+              <circle cx="${iso(288, 540, 12)[0] - 5}" cy="${iso(288, 540, 12)[1] - 3}" r="2" fill="#2C2A29"/>
+              <circle cx="${iso(288, 540, 12)[0] + 5}" cy="${iso(288, 540, 12)[1] + 2}" r="2" fill="#2C2A29"/>
             </g>
           </g>
 
-          <!-- Khung mái che xanh ngọc thoáng nhìn toàn bộ bên dưới -->
           <g opacity="0.88">
             ${isoBox(44, 324, 12, 12, 3, 112, "#4EB3C1", "#389FAD", "#2B8491")}
             ${isoBox(424, 324, 12, 12, 3, 112, "#4EB3C1", "#389FAD", "#2B8491")}
             ${isoBox(44, 624, 12, 12, 3, 112, "#4EB3C1", "#389FAD", "#2B8491")}
             ${isoBox(424, 624, 12, 12, 3, 112, "#4EB3C1", "#389FAD", "#2B8491")}
-            ${isoFloor(44, 324, 392, 312, 116, "#DDF3F6", 'opacity="0.45"')}
+            ${isoFloor(44, 324, 392, 312, 116, "#DDF3F6", 'opacity="0.42"')}
           </g>
         </g>
 
-        <!-- 2. LỚP NHÀ TRẺ (5 – 36 THÁNG) (u: 440..720, v: 340..600) — SÁT SÂN CHƠI CHÍNH (Không vẽ WC) -->
+        <!-- 2. LỚP NHÀ TRẺ (5 – 36 THÁNG) — NGĂN NẮP VỚI GIƯỜNG NGỦ NỆM, THẢM CHƠI & KỆ ĐỒ CHƠI -->
         <g id="room-nha-tre">
           ${isoCutawayRoom(440, 340, 280, 260, 2, 54, "#FFF7F8", "#FCE6EA", "#F3D3DA", "#FFFDF9")}
-          <!-- Ánh đèn ấm dịu bật sáng khi ghé thăm -->
           <ellipse id="lamp-nt-cone" cx="${iso(580, 470, 5)[0]}" cy="${iso(580, 470, 5)[1]}" rx="115" ry="66" fill="url(#lampSpotGrad)" opacity="0.25"/>
-          <!-- Thảm xốp pastel 4 ô -->
-          ${isoFloor(490, 420, 74, 74, 4, "#BCE5EB")}
-          ${isoFloor(568, 420, 74, 74, 4, "#F7D1DA")}
-          ${isoFloor(490, 498, 74, 74, 4, "#FFE79E")}
-          ${isoFloor(568, 498, 74, 74, 4, "#C4E8D1")}
-          <!-- 2 Nệm & gối nhỏ êm ái -->
-          ${isoBox(470, 368, 86, 42, 4, 12, "#FFFDF9", "#F3E6E8", "#E6D5D8")}
-          ${isoBox(476, 374, 24, 28, 16, 7, "#F7D1DA", "#E6B8C4", "#D4A3B0")}
-          ${isoBox(574, 368, 86, 42, 4, 12, "#FFFDF9", "#E5EFF2", "#D5E4E8")}
-          ${isoBox(580, 374, 24, 28, 16, 7, "#BCE5EB", "#9ED2DA", "#88BFC8")}
-          <!-- Khối đồ chơi mềm bo tròn -->
-          ${isoBox(656, 515, 32, 32, 4, 24, "#F4A3B4", "#E28B9E", "#CC7589")}
-          ${isoBox(634, 534, 22, 22, 4, 18, "#F7D37A", "#E5BC5E", "#CFA448")}
+          <!-- Dãy nệm ngủ pastel + gối gọn gàng dọc tường sau -->
+          ${isoBox(468, 366, 72, 38, 4, 10, "#FFFDF9", "#F3E6E8", "#E6D5D8")}
+          ${isoBox(473, 371, 20, 28, 14, 6, "#F7D1DA", "#E6B8C4", "#D4A3B0")}
+          ${isoBox(552, 366, 72, 38, 4, 10, "#FFFDF9", "#E5EFF2", "#D5E4E8")}
+          ${isoBox(557, 371, 20, 28, 14, 6, "#BCE5EB", "#9ED2DA", "#88BFC8")}
+          ${isoBox(636, 366, 66, 38, 4, 10, "#FFFDF9", "#F7EEDB", "#EAE0CA")}
+          ${isoBox(641, 371, 18, 28, 14, 6, "#FFE79E", "#ECD07C", "#D4B662")}
+          <!-- Thảm xốp 4 ô ở giữa phòng -->
+          ${isoFloor(506, 432, 64, 64, 4, "#BCE5EB")}
+          ${isoFloor(574, 432, 64, 64, 4, "#F7D1DA")}
+          ${isoFloor(506, 500, 64, 64, 4, "#FFE79E")}
+          ${isoFloor(574, 500, 64, 64, 4, "#C4E8D1")}
+          <!-- Kệ đồ chơi khối mềm góc trái & bàn pha sữa bên phải -->
+          ${isoBox(460, 456, 26, 92, 4, 28, "#F5DEBE", "#E3C59B", "#D0B084")}
+          ${isoBox(464, 466, 16, 18, 32, 12, "#E87A90", "#CE6278", "#B64F64")}
+          ${isoBox(464, 496, 16, 18, 32, 12, "#4EB3C1", "#389FAD", "#2B8491")}
+          ${isoBox(656, 514, 42, 42, 4, 22, "#F4A3B4", "#E28B9E", "#CC7589")}
+          ${isoBox(668, 526, 16, 16, 26, 10, "#FFFDF9", "#BCE5EB", "#96CDD6")}
         </g>
 
-        <!-- 3. LỚP MẪU GIÁO BÉ (3 – 4 TUỔI) (u: 720..1000, v: 340..600) — GIỮA NHÀ TRẺ & VĂN PHÒNG (Không vẽ WC) -->
+        <!-- 3. LỚP MẪU GIÁO BÉ (3 – 4 TUỔI) — BẢNG HOA BÉ NGOAN, TỦ BA LÔ & 2 CỤM BÀN GHẾ -->
         <g id="room-mau-giao-be">
           ${isoCutawayRoom(720, 340, 280, 260, 2, 54, "#F5FBF7", "#E4F2E9", "#D3E8DA", "#FFFDF9")}
           <ellipse id="lamp-mgb-cone" cx="${iso(860, 470, 5)[0]}" cy="${iso(860, 470, 5)[1]}" rx="115" ry="66" fill="url(#lampSpotGrad)" opacity="0.25"/>
           <!-- Bảng Hoa Bé Ngoan treo tường sau -->
-          ${isoBox(800, 344, 110, 10, 18, 30, "#FFFDF9", "#E87A90", "#D16379")}
-          <!-- Góc xếp hình khối màu -->
-          ${isoBox(752, 375, 58, 34, 4, 26, "#F5DEBE", "#E3C59B", "#D0B084")}
-          ${isoBox(762, 382, 18, 18, 30, 14, "#E87A90", "#CE6278", "#B64F64")}
-          ${isoBox(784, 382, 18, 18, 30, 18, "#4EB3C1", "#389FAD", "#2B8491")}
-          <!-- Bàn tô màu cùng ghế nhỏ -->
-          ${isoBox(838, 455, 86, 68, 14, 10, "#FFE599", "#ECCB72", "#D5B156")}
-          ${isoBox(870, 478, 22, 22, 4, 10, "#E4C193", "#CFA774", "#B8905E")}
-          ${isoBox(808, 474, 22, 22, 4, 14, "#E87A90", "#CE6278", "#B64F64")}
-          ${isoBox(936, 474, 22, 22, 4, 14, "#389FAD", "#2A8390", "#226F7A")}
+          ${isoBox(794, 346, 120, 8, 18, 30, "#FFFDF9", "#E87A90", "#D16379")}
+          ${isoFloor(812, 355, 22, 2, 34, "#F4C96B")}
+          ${isoFloor(844, 355, 22, 2, 34, "#BCE5EB")}
+          ${isoFloor(876, 355, 22, 2, 34, "#C4E8D1")}
+          <!-- Tủ để ba lô & xếp dép dọc tường trái -->
+          ${isoBox(740, 380, 32, 118, 4, 30, "#F5DEBE", "#E3C59B", "#D0B084")}
+          ${isoBox(746, 392, 18, 20, 34, 14, "#E87A90", "#CE6278", "#B64F64")}
+          ${isoBox(746, 424, 18, 20, 34, 14, "#4EB3C1", "#389FAD", "#2B8491")}
+          ${isoBox(746, 456, 18, 20, 34, 14, "#F7D37A", "#E5BC5E", "#CFA448")}
+          <!-- 2 cụm bàn học mầm non kèm ghế 4 phía gọn gàng -->
+          ${isoMiniTable(835, 428, 4, "#FFE599", "#E87A90", "#52A877")}
+          ${isoMiniTable(895, 506, 4, "#4EB3C1", "#F4C96B", "#E87A90")}
         </g>
 
-        <!-- 4. VĂN PHÒNG & CAMERA GIÁM SÁT 24/7 (u: 1000..1240, v: 340..600) -->
+        <!-- 4. VĂN PHÒNG & CAMERA GIÁM SÁT 24/7 -->
         <g id="room-van-phong">
           ${isoCutawayRoom(1000, 340, 240, 260, 2, 54, "#FFFDF8", "#F4ECE0", "#E8DDD0", "#FFFDF9")}
-          <!-- Camera giám sát 24/7 gắn góc tường -->
           <g id="office-cctv-camera">
             ${isoBox(1180, 346, 26, 18, 42, 16, "#FFFDF9", "#389FAD", "#297E8A")}
             <circle cx="${iso(1193, 362, 48)[0]}" cy="${iso(1193, 362, 48)[1]}" r="5" fill="#52A877"/>
           </g>
-          <!-- Bàn Văn phòng + Màn hình Camera 24/7 4 góc lớp -->
+          <!-- Tủ hồ sơ sau bàn làm việc -->
+          ${isoBox(1025, 362, 92, 26, 4, 38, "#EFE3D3", "#DFCEBA", "#CEB9A2")}
+          <!-- Bàn làm việc & màn hình camera giám sát 24/7 -->
           ${isoBox(1062, 420, 118, 58, 20, 10, "#DFBE97", "#C79E6E", "#B28758")}
           ${isoBox(1070, 426, 102, 46, 2, 18, "#EBD6BA", "#D5BA96", "#C0A27D")}
-          ${isoBox(1086, 428, 52, 14, 30, 30, "#2C2A29", "#3F3C3A", "#22201F")}
-          ${isoFloor(1092, 444, 40, 2, 46, "#A6E3E9")}
-          <!-- Ghế & lọ hoa sen -->
-          ${isoBox(1188, 434, 16, 16, 30, 16, "#F7D1DA", "#E87A90", "#C95E75")}
+          ${isoBox(1086, 428, 56, 14, 30, 32, "#2C2A29", "#3F3C3A", "#22201F")}
+          ${isoFloor(1092, 444, 20, 2, 48, "#A6E3E9")}
+          ${isoFloor(1116, 444, 20, 2, 48, "#C4E8D1")}
+          ${isoBox(1188, 434, 18, 18, 30, 16, "#F7D1DA", "#E87A90", "#C95E75")}
+          <!-- Ghế tiếp phụ huynh phía trước -->
+          ${isoBox(1096, 514, 24, 24, 4, 16, "#4EB3C1", "#389FAD", "#2B8491")}
         </g>
 
-        <!-- 5. CẦU THANG LÊN LẦU 2 (u: 1240..1380, v: 120..340, leo từ z=2 lên z=142) — ĐÃ XÓA TRANH HOA SEN CHIẾU NGHỈ -->
+        <!-- 5. CẦU THANG LÊN LẦU 2 (VẼ TỪ SAU RA TRƯỚC VỚI BẬC GỖ KEM & TAY VỊN ĐÔI CHUẨN CHIỀU CẦU THANG) -->
         <g id="room-cau-thang">
-          <!-- Bệ cầu thang nối Ground Floor (v=340, z=2) lên Lầu 2 (v=120, z=142) -->
           ${(() => {
             let steps = "";
-            const stepCount = 8;
-            const dv = 220 / stepCount;
-            const dz = 140 / stepCount;
-            for (let s = 0; s < stepCount; s++) {
-              const vs = 340 - (s + 1) * dv;
+            const stepCount = 11;
+            const totalV = 410; // Chân cầu thang ngang mặt trước phòng (v=600) -> mép hành lang Lầu 2 (v=190)
+            const dv = totalV / stepCount;
+            const dz = 144 / stepCount;
+
+            // Dầm nghiêng đỡ dưới thân cầu thang ở cạnh phải (không răng cưa)
+            steps += `<polygon points="${pts([
+              iso(1368, 600, 2),
+              iso(1368, 190, 144),
+              iso(1368, 190, 2),
+            ])}" fill="#B9C7D0" stroke="#B9C7D0" stroke-width="1"/>`;
+
+            // Vẽ từng bậc từ trên cao (s = stepCount - 1) xuống chân (s = 0) để đúng chiều sâu Isometric
+            for (let s = stepCount - 1; s >= 0; s--) {
+              const vs = 600 - (s + 1) * dv;
               const zs = s * dz;
-              steps += isoBox(1250, vs, 120, dv + 2, 0, zs + dz, "#E0E6EA", "#CBD4D9", "#B4C0C7");
+              const zTop = zs + dz;
+              const zBase = Math.max(2, zs - 4);
+              // Thân bậc (mặt đứng xám xanh dịu, mặt bậc gỗ kem sáng)
+              steps += isoBox(1248, vs, 120, dv + 2, zBase, zTop - zBase, "#FFF6E8", "#D0DCE3", "#BAC9D2");
+              // Mũi bậc sáng nhẹ tạo từng bậc tách bạch rõ nét
+              steps += isoBox(1248, vs + dv - 3, 120, 5, zTop - 3, 3.5, "#FFFDF9", "#E7D9C6", "#D6C5B0");
             }
-            // Tay vịn nhiều màu bo tròn dọc bên trái cầu thang
-            const railPalette = ["#E87A90", "#F4C96B", "#52A877", "#389FAD", "#A68AD9"];
-            for (let r = 0; r < 5; r++) {
-              const vr = 325 - r * 46;
-              const zr = 14 + r * 28;
-              steps += isoBox(1252, vr, 8, 8, zr, 28, railPalette[r], railPalette[r], railPalette[r]);
+
+            // Hai bên tay vịn nhiều màu (cạnh trái u=1252 & cạnh phải u=1364)
+            const railPalette = ["#E87A90", "#F4C96B", "#52A877", "#389FAD", "#A68AD9", "#F08CA0"];
+            for (let r = 5; r >= 0; r--) {
+              const vr = 582 - r * 74;
+              const zr = 14 + r * 24;
+              steps += isoBox(1362, vr, 6, 6, zr, 28, railPalette[r], railPalette[r], railPalette[r]);
             }
-            const [rx1, ry1] = iso(1256, 325, 42);
-            const [rx2, ry2] = iso(1256, 140, 154);
-            steps += `<line x1="${rx1}" y1="${ry1}" x2="${rx2}" y2="${ry2}" stroke="#389FAD" stroke-width="6" stroke-linecap="round"/>`;
+            const [rxR1, ryR1] = iso(1365, 582, 42);
+            const [rxR2, ryR2] = iso(1365, 200, 168);
+            steps += `<line x1="${rxR1}" y1="${ryR1}" x2="${rxR2}" y2="${ryR2}" stroke="#389FAD" stroke-width="5" stroke-linecap="round"/>`;
+
+            for (let r = 5; r >= 0; r--) {
+              const vr = 582 - r * 74;
+              const zr = 14 + r * 24;
+              steps += isoBox(1250, vr, 6, 6, zr, 28, railPalette[r], railPalette[r], railPalette[r]);
+            }
+            const [rxL1, ryL1] = iso(1253, 582, 42);
+            const [rxL2, ryL2] = iso(1253, 200, 168);
+            steps += `<line x1="${rxL1}" y1="${ryL1}" x2="${rxL2}" y2="${ryL2}" stroke="#389FAD" stroke-width="5.5" stroke-linecap="round"/>`;
             return steps;
           })()}
         </g>
 
-        <!-- 6. BÊN PHẢI VĂN PHÒNG THEO ĐÚNG THỨ TỰ: KHO DỤNG CỤ -> THỰC ĐƠN TUẦN -> BẾP NẤU -->
+        <!-- 6. KHO DỤNG CỤ + BẾP NẤU XOAY 90° HÌNH CHỮ L (CỬA HƯỚNG VỀ HÀNH LANG) -->
         <g id="room-bep-kho">
-          ${isoCutawayRoom(1380, 340, 540, 260, 2, 54, "#FFFDF9", "#F2EAE0", "#E5DACB", "#FFFDF9")}
+          <!-- Nền L-shape: nhánh Kho (1380..1680, v=340..600) + nhánh Bếp xoay 90° (1680..1920, v=340..724 sát hàng rào trước) -->
+          ${isoFloor(1380, 340, 300, 260, 2, "#FFFDF9")}
+          ${isoFloor(1680, 340, 240, 384, 2, "#FDF8F0")}
 
-          <!-- 6.1 KHO DỤNG CỤ (u: 1390..1540) -->
+          <!-- Tường hậu chạy suốt sau Kho & Bếp (v=340) + tường trái sát cầu thang (u=1380) -->
+          ${isoBox(1380, 340, 540, 14, 2, 54, "#FFFDF9", "#F2EAE0", "#E5DACB")}
+          ${isoBox(1380, 340, 14, 260, 2, 54, "#FFFDF9", "#F2EAE0", "#E5DACB")}
+
+          <!-- Tường vách bếp phía hành lang (u=1680, v=600..724) với CỬA MỞ HƯỚNG VỀ HÀNH LANG -->
+          ${isoBox(1680, 600, 12, 26, 2, 46, "#FFFDF9", "#F2EAE0", "#E5DACB")}
+          ${isoBox(1680, 682, 12, 42, 2, 46, "#FFFDF9", "#F2EAE0", "#E5DACB")}
+          <!-- Thảm đón & cánh cửa Bếp mở hướng vào hành lang -->
+          ${isoFloor(1656, 628, 40, 52, 3, "#BCE5EB")}
+          ${isoBox(1690, 626, 36, 7, 3, 45, "#6EC2CE", "#389FAD", "#297E8A")}
+
+          <!-- Gờ thấp bao nét chữ L ngoài cùng bên phải & mặt trước gần hàng rào -->
+          ${isoBox(1908, 340, 12, 384, 2, 16, "#FFFDF9", "#EFE6DA", "#DDD1C1")}
+          ${isoBox(1680, 712, 240, 12, 2, 16, "#FFFDF9", "#EFE6DA", "#DDD1C1")}
+
           <g id="area-kho-dung-cu">
-            ${isoBox(1408, 366, 108, 42, 4, 42, "#EFE3D3", "#DFCEBA", "#CEB9A2")}
-            ${isoBox(1414, 372, 28, 28, 46, 16, "#BCE5EB", "#96CDD6", "#7EB8C2")}
-            ${isoBox(1448, 372, 28, 28, 46, 14, "#F7D1DA", "#E6B4C0", "#D39CAC")}
-            ${isoBox(1482, 372, 28, 28, 46, 18, "#FFE79E", "#ECD07C", "#D4B662")}
+            ${isoBox(1414, 366, 138, 44, 4, 42, "#EFE3D3", "#DFCEBA", "#CEB9A2")}
+            ${isoBox(1422, 372, 34, 30, 46, 16, "#BCE5EB", "#96CDD6", "#7EB8C2")}
+            ${isoBox(1464, 372, 34, 30, 46, 14, "#F7D1DA", "#E6B4C0", "#D39CAC")}
+            ${isoBox(1506, 372, 34, 30, 46, 18, "#FFE79E", "#ECD07C", "#D4B662")}
+            ${isoBox(1432, 470, 66, 46, 4, 20, "#F5DEBE", "#E3C59B", "#D0B084")}
           </g>
 
-          <!-- 6.2 THỰC ĐƠN TUẦN (u: 1550..1720) -->
-          <g id="area-thuc-don-tuan">
-            ${isoBox(1585, 344, 105, 10, 18, 32, "#FFFDF9", "#52A877", "#3D895E")}
-            <!-- Xe đẩy chia khay gọn gàng -->
-            ${isoBox(1600, 445, 72, 48, 4, 24, "#E9F7F1", "#C6E8D8", "#AED7C4")}
-            ${isoBox(1612, 455, 20, 20, 28, 6, "#F4C96B", "#DDA946", "#C79234")}
-            ${isoBox(1640, 455, 20, 20, 28, 6, "#E87A90", "#CE6278", "#B64F64")}
-          </g>
-
-          <!-- 6.3 BẾP NẤU (u: 1730..1910) -->
           <g id="area-bep-nau">
-            ${isoBox(1748, 390, 138, 68, 4, 28, "#389FAD", "#EDE5DC", "#DFD4C8")}
-            ${isoBox(1768, 405, 34, 34, 32, 16, "#E5989B", "#CC7C80", "#B56468")}
-            ${isoBox(1820, 405, 32, 32, 32, 14, "#F4C96B", "#DDA946", "#C79234")}
-            <!-- Hơi ấm thơm bay nhẹ từ nồi bếp -->
-            <path class="anim-steam" d="M ${iso(1785, 422, 52)[0]} ${iso(1785, 422, 52)[1]} q -8 -16 4 -30 t -2 -26" fill="none" stroke="#E2C8B8" stroke-width="4" stroke-linecap="round"/>
-            <path class="anim-steam-delay" d="M ${iso(1836, 422, 50)[0]} ${iso(1836, 422, 50)[1]} q 8 -16 -4 -30 t 2 -26" fill="none" stroke="#E2C8B8" stroke-width="3.5" stroke-linecap="round"/>
+            <!-- Bệ bếp dài xoay dọc theo trục V (từ cạnh sau v=375 ra gần hàng rào v=655) -->
+            ${isoBox(1822, 376, 68, 250, 4, 28, "#389FAD", "#EDE5DC", "#DFD4C8")}
+            ${isoBox(1836, 405, 36, 36, 32, 16, "#E5989B", "#CC7C80", "#B56468")}
+            ${isoBox(1836, 475, 34, 34, 32, 14, "#F4C96B", "#DDA946", "#C79234")}
+            ${isoBox(1838, 545, 32, 42, 32, 10, "#BCE5EB", "#96CDD6", "#7EB8C2")}
+            <!-- Bàn soạn đồ ăn ngay cạnh cửa hướng ra hành lang -->
+            ${isoBox(1726, 560, 56, 86, 4, 24, "#E9F7F1", "#C6E8D8", "#AED7C4")}
+            ${isoBox(1742, 576, 22, 22, 28, 7, "#F4C96B", "#DDA946", "#C79234")}
+            ${isoBox(1742, 608, 22, 22, 28, 7, "#E87A90", "#CE6278", "#B64F64")}
+            <path class="anim-steam" d="M ${iso(1854, 422, 52)[0]} ${iso(1854, 422, 52)[1]} q -8 -16 4 -30 t -2 -26" fill="none" stroke="#E2C8B8" stroke-width="4" stroke-linecap="round"/>
+            <path class="anim-steam-delay" d="M ${iso(1854, 492, 50)[0]} ${iso(1854, 492, 50)[1]} q 8 -16 -4 -30 t 2 -26" fill="none" stroke="#E2C8B8" stroke-width="3.5" stroke-linecap="round"/>
           </g>
         </g>
 
-        <!-- HIÊN CHÍNH chạy dọc mặt trước với cột hồng phấn & bàn ghế nhựa nhiều màu -->
+        <!-- HIÊN CHÍNH -->
         <g id="veranda-foreground">
-          ${isoFloor(440, 600, 800, 65, 3, "#EFE4D6")}
+          ${isoFloor(440, 600, 940, 65, 3, "#EFE4D6")}
           ${isoMiniTable(565, 622, 3, "#48B5C4", "#E87A90", "#52A877")}
           ${isoMiniTable(835, 622, 3, "#F4C96B", "#389FAD", "#E87A90")}
           ${isoMiniTable(1105, 622, 3, "#52A877", "#F4C96B", "#48B5C4")}
@@ -421,112 +616,134 @@ export function renderCampusScene(hostEl) {
         </g>
       </g>
 
-      <!-- ==================== LẦU 2 (NÂNG CAO PHÍA TRÊN, LIÊN KẾT QUA CẦU THANG) ==================== -->
-      <!-- Đúng thứ tự Trái -> Phải: [Sân chơi nhỏ trái] — [Mẫu giáo lớn (5-6t)] — [Lối lên Cầu thang] — [Mẫu giáo nhỡ (4-5t)] — [Sân chơi nhỏ phải] -->
-      <g id="floor-2-iso" filter="url(#paperShadow)">
-        <!-- Đế sàn nâng Lầu 2 (z = 128 .. 144) -->
-        ${isoBox(580, -180, 1320, 300, 128, 16, "#F5EDE3", "#E2D4C4", "#CFC0AE")}
+      <!-- HÀNG RÀO BÊN PHẢI TẦNG TRỆT (u = 1958, v = 310 .. 752) -->
+      ${renderCementColorFenceAlongV(1958, 310, 17, 26, 40, 0)}
 
-        <!-- 2.1 SÂN CHƠI NHỎ TRÁI (u: 580..760) — Gọn sạch, KHÔNG vẽ đồ chơi lớn -->
+      <!-- ==================== LẦU 2 (HÀNH LANG TRƯỚC NỐI 2 SÂN & HÀNG RÀO SẮT 3 CẠNH, KHÔNG CÂY) ==================== -->
+      <g id="floor-2-iso" filter="url(#paperShadow)">
+        ${isoBox(580, -180, 1320, 376, 128, 16, "#F5EDE3", "#E2D4C4", "#CFC0AE")}
+
+        <!-- Hành lang Lầu 2 chạy suốt phía trước các phòng nối liền 2 sân chơi hai đầu -->
+        <g id="floor2-front-corridor">
+          ${isoFloor(760, 112, 960, 78, 145, "#EFE5D8")}
+          ${isoFloor(760, 112, 960, 10, 145, "#E8DACC")}
+        </g>
+
         <g id="room-san-nho-trai">
-          ${isoFloor(586, -172, 174, 284, 145, "#D9F2E4")}
+          ${isoFloor(586, -172, 174, 362, 145, "#D9F2E4")}
           ${isoBox(635, -70, 56, 56, 156, 8, "#F4C96B", "#DDA946", "#C79234")}
           ${isoBox(655, -50, 16, 16, 145, 11, "#E4C193", "#CFA774", "#B8905E")}
           ${isoBox(608, -60, 20, 20, 145, 12, "#E87A90", "#CE6278", "#B64F64")}
-          ${isoCuteTree(615, -145, 145, 0.55)}
+          ${isoBox(688, 20, 34, 34, 145, 14, "#4EB3C1", "#389FAD", "#2B8491")}
         </g>
 
-        <!-- 2.2 LỚP MẪU GIÁO LỚN (5 – 6 TUỔI) (u: 760..1180) — Không vẽ WC -->
         <g id="room-mau-giao-lon">
           ${isoCutawayRoom(760, -172, 420, 284, 145, 52, "#FFFDF8", "#EFE4D6", "#E2D5C5", "#FFFDF9")}
           <ellipse id="lamp-mgl" cx="${iso(970, -30, 147)[0]}" cy="${iso(970, -30, 147)[1]}" rx="120" ry="68" fill="url(#lampSpotGrad)" opacity="0.25"/>
-          <!-- Bảng chữ cái A Ă Â trên tường sau -->
+          <!-- Bảng chữ cái lớp 1 & kệ sách gọn gàng -->
           ${isoBox(895, -166, 148, 10, 162, 30, "#E4C193", "#3B8D70", "#2F755C")}
-          <!-- Góc sách bên trái -->
-          ${isoBox(785, -142, 74, 34, 146, 32, "#F5DEBE", "#E3C59B", "#D0B084")}
-          <!-- 2 bàn học gọn chuẩn bị vào Lớp 1 -->
+          ${isoBox(785, -142, 74, 34, 146, 36, "#F5DEBE", "#E3C59B", "#D0B084")}
+          ${isoBox(794, -135, 16, 22, 182, 12, "#E87A90", "#CE6278", "#B64F64")}
+          ${isoBox(816, -135, 16, 22, 182, 14, "#4EB3C1", "#389FAD", "#2B8491")}
+          ${isoBox(836, -135, 16, 22, 182, 10, "#F7D37A", "#E5BC5E", "#CFA448")}
+          <!-- 2 dãy bàn học chữ cái & ghế -->
           ${isoBox(875, -55, 86, 48, 157, 9, "#F8D889", "#E2BD63", "#C9A44D")}
           ${isoBox(1015, -55, 86, 48, 157, 9, "#A9DFBF", "#80C89E", "#66AF85")}
           ${isoBox(890, 5, 22, 22, 146, 12, "#389FAD", "#2A8390", "#226F7A")}
           ${isoBox(1030, 5, 22, 22, 146, 12, "#E87A90", "#CE6278", "#B64F64")}
+          ${isoBox(890, -86, 22, 22, 146, 12, "#52A877", "#3F8E61", "#31774F")}
+          ${isoBox(1030, -86, 22, 22, 146, 12, "#F4C96B", "#DDA946", "#C79234")}
         </g>
 
-        <!-- 2.3 LỐI LÊN CẦU THANG LẦU 2 (u: 1180..1380) -->
         <g id="room-loi-cau-thang-l2">
           ${isoFloor(1180, -172, 200, 284, 145, "#F6EFE7")}
-          <!-- Lan can an toàn nhiều màu quanh chiếu nghỉ Lầu 2 -->
           ${isoBox(1196, -110, 164, 12, 146, 22, "#4EB3C1", "#389FAD", "#2B8491")}
+          ${isoBox(1210, -40, 62, 28, 146, 18, "#EFE3D3", "#DFCEBA", "#CEB9A2")}
         </g>
 
-        <!-- 2.4 LỚP MẪU GIÁO NHỠ (4 – 5 TUỔI) (u: 1380..1720) — Không vẽ WC -->
         <g id="room-mau-giao-nho">
           ${isoCutawayRoom(1380, -172, 340, 284, 145, 52, "#FFF8FA", "#F8E3E8", "#ECD2D9", "#FFFDF9")}
           <ellipse id="lamp-mgn" cx="${iso(1550, -30, 147)[0]}" cy="${iso(1550, -30, 147)[1]}" rx="115" ry="66" fill="url(#lampSpotGrad)" opacity="0.25"/>
-          <!-- Bảng góc vẽ nghệ thuật & giá vẽ -->
+          <!-- Bảng trưng bày tranh, giá vẽ sáng tạo & bàn học nhóm -->
           ${isoBox(1425, -166, 112, 10, 162, 30, "#FFFDF9", "#E87A90", "#CE6278")}
           ${isoBox(1640, -125, 36, 24, 146, 36, "#FFFDF9", "#D9A875", "#C2905D")}
-          <!-- Bàn học nhóm + ghế màu pastel -->
+          ${isoBox(1646, -120, 22, 12, 182, 14, "#BCE5EB", "#96CDD6", "#7EB8C2")}
           ${isoBox(1490, -55, 104, 64, 157, 10, "#6EC2CE", "#4CA6B3", "#38919E")}
           ${isoBox(1464, -36, 22, 22, 146, 12, "#F4C96B", "#DDA946", "#C79234")}
           ${isoBox(1604, -36, 22, 22, 146, 12, "#E87A90", "#CE6278", "#B64F64")}
           ${isoBox(1532, 16, 22, 22, 146, 12, "#52A877", "#3F8E61", "#31774F")}
         </g>
 
-        <!-- 2.5 SÂN CHƠI NHỎ PHẢI (u: 1720..1900) — Gọn sạch, KHÔNG vẽ đồ chơi lớn -->
         <g id="room-san-nho-phai">
-          ${isoFloor(1720, -172, 174, 284, 145, "#D9F2E4")}
+          ${isoFloor(1720, -172, 174, 362, 145, "#D9F2E4")}
           ${isoBox(1770, -70, 56, 56, 156, 8, "#F7D1DA", "#E6B4C0", "#D39CAC")}
           ${isoBox(1790, -50, 16, 16, 145, 11, "#E4C193", "#CFA774", "#B8905E")}
           ${isoBox(1834, -55, 20, 20, 145, 12, "#52A877", "#3F8E61", "#31774F")}
-          ${isoCuteTree(1840, -145, 145, 0.55)}
+          ${isoBox(1752, 24, 34, 34, 145, 14, "#F4C96B", "#DDA946", "#C79234")}
         </g>
 
-        <!-- Hàng cột hồng & viền rèm sọc xanh ngọc mặt trước Lầu 2 -->
         <g id="floor2-front-trim">
           ${isoPinkPillar(760, 114, 145, 62)}
           ${isoPinkPillar(1176, 114, 145, 62)}
           ${isoPinkPillar(1380, 114, 145, 62)}
           ${isoPinkPillar(1716, 114, 145, 62)}
-          <!-- Dải rèm sọc xanh ngọc gọn đẹp phía trên mặt trước -->
           ${isoBox(760, 108, 416, 10, 198, 12, "#BCE5EB", "#2E97A6", "#257D8A")}
           ${isoBox(1380, 108, 336, 10, 198, 12, "#BCE5EB", "#2E97A6", "#257D8A")}
+        </g>
+
+        <!-- Hàng rào sắt an toàn vây 3 cạnh Lầu 2 (Trái, Trước hành lang, Phải) -->
+        <g id="floor2-iron-railings">
+          ${renderIronFenceAlongV(584, -174, 188, 145, 34, 28)}
+          ${renderIronFenceAlongU(584, 1246, 188, 145, 34, 28)}
+          ${renderIronFenceAlongU(1372, 1894, 188, 145, 34, 28)}
+          ${renderIronFenceAlongV(1894, -174, 188, 145, 34, 28)}
         </g>
       </g>
 
       <!-- ================================================================= -->
-      <!-- MẶT TIỀN CỔNG TRƯỜNG & HÀNG RÀO XI MĂNG SƠN MÀU                   -->
+      <!-- MẶT TIỀN: HÀNG RÀO TRƯỚC KÉO DÀI HẾT CẤU TRÚC + CỔNG 30° + BẢNG 30° -->
       <!-- ================================================================= -->
       <g id="facade-curtain">
-        <!-- Rèm che mặt trước khu sân (cuộn lên khi mở cổng) -->
-        <g id="facade-green-curtains" opacity="0.92">
-          ${isoBox(680, 680, 310, 12, 6, 62, "#74BD74", "#5BA45B", "#498C49")}
-          ${isoBox(1260, 680, 320, 12, 6, 62, "#74BD74", "#5BA45B", "#498C49")}
-        </g>
-
-        <!-- Hàng rào xi măng sơn màu + Bảng Nội Quy & Thông Báo -->
+        <!-- HÀNG RÀO XI MĂNG SƠN MÀU KÉO DÀI HẾT CẠNH TRƯỚC (u = -6 .. 1966) -->
         <g id="facade-outer-walls">
-          ${renderCementColorFenceIso(700, 740, 12, 26, 40, 0)}
-          ${renderCementColorFenceIso(1245, 740, 12, 26, 40, 0)}
+          ${renderCementColorFenceAlongU(-6, 750, 39, 26, 40, 0)}
+          ${renderCementColorFenceAlongU(1240, 750, 28, 26, 40, 0)}
 
-          <!-- Bảng Nội quy phụ huynh (trái cổng) -->
-          <g id="sign-noi-quy" transform="translate(${iso(800, 750, 34)[0] - 80}, ${iso(800, 750, 34)[1] - 42})" filter="url(#paperShadow)">
-            <rect x="0" y="0" width="150" height="86" rx="16" fill="#FFFDF9"/>
-            <text x="75" y="24" text-anchor="middle" font-family="Quicksand, sans-serif" font-size="11.5" font-weight="700" fill="#B82C3E">NỘI QUY PHỤ HUYNH</text>
-            <rect x="18" y="34" width="114" height="5" rx="2.5" fill="#E8DDD0"/>
-            <rect x="18" y="46" width="98" height="5" rx="2.5" fill="#F0E7DC"/>
-            <rect x="18" y="58" width="108" height="5" rx="2.5" fill="#E8DDD0"/>
+          <!-- Bảng NỘI QUY PHỤ HUYNH đặt nghiêng đúng góc 30° Isometric (v_front = 752) -->
+          <g id="sign-noi-quy-iso">
+            ${isoBox(714, 738, 178, 14, 16, 88, "#F0E9DF", "#E5DDD1", "#D4C9BA")}
+            <g transform="matrix(0.866025, 0.5, 0, 1, ${nqX}, ${nqY})">
+              <rect x="0" y="0" width="172" height="82" rx="12" fill="#FFFDF9"/>
+              <text x="86" y="25" text-anchor="middle" font-family="Quicksand, sans-serif" font-size="12" font-weight="700" fill="#B82C3E">NỘI QUY PHỤ HUYNH</text>
+              <rect x="18" y="36" width="136" height="5" rx="2.5" fill="#E8DDD0"/>
+              <rect x="18" y="48" width="116" height="5" rx="2.5" fill="#F0E7DC"/>
+              <rect x="18" y="60" width="126" height="5" rx="2.5" fill="#E8DDD0"/>
+            </g>
           </g>
 
-          <!-- Bảng Thông báo (phải cổng) -->
-          <g id="sign-thong-bao" transform="translate(${iso(1390, 748, 34)[0] - 70}, ${iso(1390, 748, 34)[1] - 42})" filter="url(#paperShadow)">
-            <rect x="0" y="0" width="144" height="86" rx="16" fill="#FFFDF9"/>
-            <text x="72" y="24" text-anchor="middle" font-family="Quicksand, sans-serif" font-size="12" font-weight="700" fill="#B82C3E">THÔNG BÁO</text>
-            <rect x="16" y="34" width="48" height="36" rx="8" fill="#FFF4DC"/>
-            <rect x="76" y="34" width="50" height="36" rx="8" fill="#EBF8FA"/>
+          <!-- Bảng THÔNG BÁO đặt nghiêng đúng góc 30° Isometric (v_front = 752) -->
+          <g id="sign-thong-bao-iso">
+            ${isoBox(1320, 738, 174, 14, 16, 88, "#F0E9DF", "#E5DDD1", "#D4C9BA")}
+            <g transform="matrix(0.866025, 0.5, 0, 1, ${tbX}, ${tbY})">
+              <rect x="0" y="0" width="168" height="82" rx="12" fill="#FFFDF9"/>
+              <text x="84" y="25" text-anchor="middle" font-family="Quicksand, sans-serif" font-size="12.5" font-weight="700" fill="#B82C3E">THÔNG BÁO</text>
+              <rect x="18" y="35" width="60" height="34" rx="8" fill="#FFF4DC"/>
+              <rect x="88" y="35" width="62" height="34" rx="8" fill="#EBF8FA"/>
+            </g>
           </g>
         </g>
 
-        <!-- Hai trụ cổng xanh ngọc Isometric -->
+        <!-- HAI CÁNH CỔNG CHÍNH ISOMETRIC 30° (Đẩy trượt về đúng 2 bên trụ khi mở!) -->
+        <g id="gate-doors-iso">
+          <g id="gate-leaf-left">
+            ${renderIsoGateWing(1040, 1122, 744, 2, 98)}
+          </g>
+          <g id="gate-leaf-right">
+            ${renderIsoGateWing(1122, 1204, 744, 2, 98)}
+          </g>
+        </g>
+
+        <!-- HAI TRỤ CỔNG XANH NGỌC ISOMETRIC -->
         <g id="gate-pillars" filter="url(#paperShadow)">
           ${isoBox(1008, 728, 32, 32, 0, 108, "#4EB3C1", "#389FAD", "#297E8A")}
           ${isoBox(1004, 724, 40, 40, 108, 12, "#FFFDF9", "#EAE3DA", "#D8CFC4")}
@@ -534,100 +751,62 @@ export function renderCampusScene(hostEl) {
           ${isoBox(1200, 724, 40, 40, 108, 12, "#FFFDF9", "#EAE3DA", "#D8CFC4")}
         </g>
 
-        <!-- Nhóm Lá cờ & Biển hiệu có ảnh logo thật đính kèm -->
+        <!-- LÁ CỜ MỀM MẠI BAY PHẤT PHƠI & BIỂN HIỆU TRƯỜNG ĐẶT NGHIÊNG 30° -->
         <g id="gate-sign-group">
-          <g id="national-flag" transform="translate(${iso(1020, 740, 120)[0]}, ${iso(1020, 740, 120)[1]})">
-            <line x1="0" y1="2" x2="-26" y2="-84" stroke="#9B9B9B" stroke-width="4.5" stroke-linecap="round"/>
-            <g class="anim-flag" style="transform-origin:-26px -84px;">
-              <path d="M -26 -84 Q -58 -94 -88 -80 L -78 -38 Q -50 -48 -18 -40 Z" fill="#D9383A" filter="url(#softShadow)"/>
-              <polygon points="-53,-75 -49,-66 -40,-66 -47,-60 -45,-51 -53,-56 -61,-51 -59,-60 -66,-66 -57,-66" fill="#FFE15A"/>
+          <g id="national-flag" transform="translate(${iso(952, 744, 118)[0]}, ${iso(952, 744, 118)[1]})">
+            <line x1="0" y1="2" x2="-22" y2="-82" stroke="#8C979E" stroke-width="4.5" stroke-linecap="round"/>
+            <circle cx="-22" cy="-83" r="3.6" fill="#F4C96B"/>
+            <g class="anim-flag" style="transform-origin:-22px -82px;">
+              <path
+                d="M -22 -82 C -38 -89 -54 -75 -74 -83 C -80 -85 -84 -81 -86 -76 C -81 -62 -79 -50 -78 -36 C -64 -34 -48 -46 -32 -37 C -24 -33 -17 -37 -14 -41 Z"
+                fill="#E23D40"
+                filter="url(#softShadow)"
+              />
+              <path d="M -46 -80 C -44 -64 -43 -52 -42 -40" stroke="#C52B2E" stroke-width="4" stroke-linecap="round" opacity="0.28"/>
+              <path d="M -66 -81 C -64 -66 -63 -54 -62 -39" stroke="#F46669" stroke-width="3" stroke-linecap="round" opacity="0.24"/>
+              <polygon points="-50,-68 -47,-61 -40,-61 -45.5,-56.5 -43.5,-49.5 -50,-53.8 -56.5,-49.5 -54.5,-56.5 -60,-61 -53,-61" fill="#FFE35C"/>
             </g>
           </g>
 
-          <g id="main-signboard" transform="translate(${iso(1122, 744, 192)[0] - 188}, ${iso(1122, 744, 192)[1] - 60})" filter="url(#paperShadow)">
-            <rect x="0" y="0" width="376" height="122" rx="20" fill="#FFFDF9"/>
-            <text x="16" y="20" font-family="Be Vietnam Pro, sans-serif" font-size="9" font-weight="600" fill="#4B4440">UBND XÃ SƠN TỊNH</text>
-            <text x="226" y="24" text-anchor="middle" font-family="Quicksand, sans-serif" font-size="15.5" font-weight="700" fill="#C43B59">LỚP MẦM NON ĐỘC LẬP</text>
-            <image href="assets/images/logo-hoa-sen.png" x="16" y="22" width="52" height="52" clip-path="url(#isoSignLogoClip)"/>
-            <text x="228" y="66" text-anchor="middle" font-family="Fraunces, serif" font-size="38" font-weight="700" letter-spacing="2">
-              <tspan fill="#D94854">H</tspan><tspan fill="#2E7D5B">O</tspan><tspan fill="#2E3A67">A </tspan><tspan fill="#E85A77">S</tspan><tspan fill="#2D4A8C">E</tspan><tspan fill="#C94E87">N</tspan>
-            </text>
-            <rect x="12" y="84" width="248" height="28" rx="10" fill="#2E9D5C"/>
-            <rect x="264" y="84" width="100" height="28" rx="10" fill="#F4D35E"/>
-            <text x="20" y="96" font-family="Be Vietnam Pro, sans-serif" font-size="8.6" font-weight="500" fill="#FFFDF9">5P5Q+5G8, Lâm Lộc, Sơn Tịnh</text>
-            <text x="20" y="108" font-family="Quicksand, sans-serif" font-size="9.4" font-weight="700" fill="#FFFDF9">0868.474.194 • 0975.551.545</text>
-            <text x="314" y="96" text-anchor="middle" font-family="Be Vietnam Pro, sans-serif" font-size="8" font-weight="700" fill="#2C2A29">QĐ 1815/QĐ-UBND</text>
-            <text x="314" y="107" text-anchor="middle" font-family="Be Vietnam Pro, sans-serif" font-size="7.5" font-weight="500" fill="#2C2A29">08/12/2025</text>
+          <g id="main-signboard-iso">
+            ${isoBox(959, 736, 326, 16, 120, 112, "#F5EFE6", "#E5DDD1", "#D4C9BA")}
+            <g id="main-signboard" transform="matrix(0.866025, 0.5, 0, 1, ${sbX}, ${sbY})">
+              <rect x="0" y="0" width="320" height="106" rx="14" fill="#FFFDF9"/>
+              <text x="14" y="18" font-family="Be Vietnam Pro, sans-serif" font-size="8.2" font-weight="600" fill="#4B4440">UBND XÃ SƠN TỊNH</text>
+              <text x="194" y="21" text-anchor="middle" font-family="Quicksand, sans-serif" font-size="13.5" font-weight="700" fill="#C43B59">LỚP MẦM NON ĐỘC LẬP</text>
+              <image href="assets/images/logo-hoa-sen.png" x="14" y="23" width="48" height="48" clip-path="url(#isoSignLogoClip)"/>
+              <text x="196" y="59" text-anchor="middle" font-family="Fraunces, serif" font-size="33" font-weight="700" letter-spacing="1.5">
+                <tspan fill="#D94854">H</tspan><tspan fill="#2E7D5B">O</tspan><tspan fill="#2E3A67">A </tspan><tspan fill="#E85A77">S</tspan><tspan fill="#2D4A8C">E</tspan><tspan fill="#C94E87">N</tspan>
+              </text>
+              <rect x="10" y="73" width="210" height="25" rx="8" fill="#2E9D5C"/>
+              <rect x="224" y="73" width="86" height="25" rx="8" fill="#F4D35E"/>
+              <text x="17" y="84" font-family="Be Vietnam Pro, sans-serif" font-size="7.6" font-weight="500" fill="#FFFDF9">5P5Q+5G8, Lâm Lộc, Sơn Tịnh</text>
+              <text x="17" y="94" font-family="Quicksand, sans-serif" font-size="8.4" font-weight="700" fill="#FFFDF9">0868.474.194 • 0975.551.545</text>
+              <text x="267" y="84" text-anchor="middle" font-family="Be Vietnam Pro, sans-serif" font-size="7.2" font-weight="700" fill="#2C2A29">QĐ 1815/QĐ-UBND</text>
+              <text x="267" y="94" text-anchor="middle" font-family="Be Vietnam Pro, sans-serif" font-size="6.8" font-weight="500" fill="#2C2A29">08/12/2025</text>
+            </g>
           </g>
         </g>
       </g>
     </g>
 
-    <!-- ===================================================================== -->
-    <!-- LỚP 3: NHÃN TÊN KHU VỰC & LỚP HỌC NỔI BẬT (KHÔNG BAO GIỜ BỊ CHE)     -->
-    <!-- ===================================================================== -->
+    <!-- LỚP 3: NHÃN KHU VỰC (ICON TRÒN KHI CHƯA TỚI -> VIÊN NHỘNG TÊN ĐẦY ĐỦ KHI TỚI) -->
     <g id="layer-foreground">
       <g id="scene-room-badges">
-        ${renderIsoRoomLabel(240, 480, 148, "SÂN CHƠI CHÍNH", "#2D8E9B", "#FFFDF9", 175)}
-        ${renderIsoRoomLabel(580, 470, 96, "LỚP NHÀ TRẺ (5–36TH)", "#F4C96B", "#3D2A06", 204)}
-        ${renderIsoRoomLabel(860, 470, 96, "LỚP MẪU GIÁO BÉ (3–4T)", "#E87A90", "#FFFDF9", 214)}
-        ${renderIsoRoomLabel(1120, 470, 96, "VĂN PHÒNG • CAMERA 24/7", "#389FAD", "#FFFDF9", 224)}
-        ${renderIsoRoomLabel(1465, 470, 92, "KHO DỤNG CỤ", "#C8955A", "#FFFDF9", 150)}
-        ${renderIsoRoomLabel(1640, 470, 92, "THỰC ĐƠN TUẦN", "#52A877", "#FFFDF9", 164)}
-        ${renderIsoRoomLabel(1825, 470, 92, "BẾP NẤU", "#E07A5F", "#FFFDF9", 132)}
+        ${renderIsoRoomLabel(240, 480, 148, "SÂN CHƠI CHÍNH", "#2D8E9B", "#FFFDF9", 206, "playground", "playground")}
+        ${renderIsoRoomLabel(580, 470, 96, "LỚP NHÀ TRẺ (5–36TH)", "#F4C96B", "#3D2A06", 242, "nursery", "baby")}
+        ${renderIsoRoomLabel(860, 470, 96, "LỚP MẪU GIÁO BÉ (3–4T)", "#E87A90", "#FFFDF9", 250, "preschool-small", "blocks")}
+        ${renderIsoRoomLabel(1120, 470, 96, "VĂN PHÒNG • CAMERA 24/7", "#389FAD", "#FFFDF9", 264, "veranda-kitchen", "camera")}
+        ${renderIsoRoomLabel(1310, 395, 132, "CẦU THANG LẦU 2", "#6F635B", "#FFFDF9", 198, "stairs", "stairs")}
+        ${renderIsoRoomLabel(1515, 470, 92, "KHO DỤNG CỤ", "#C8955A", "#FFFDF9", 176, "veranda-kitchen", "box")}
+        ${renderIsoRoomLabel(1805, 535, 92, "BẾP NẤU", "#E07A5F", "#FFFDF9", 148, "veranda-kitchen", "pot")}
 
-        ${renderIsoRoomLabel(670, -30, 224, "SÂN CHƠI NHỎ TRÁI", "#52A877", "#FFFDF9", 174)}
-        ${renderIsoRoomLabel(970, -30, 232, "LỚP MẪU GIÁO LỚN (5–6T)", "#D95D78", "#FFFDF9", 224)}
-        ${renderIsoRoomLabel(1280, -30, 220, "CẦU THANG LẦU 2", "#6F635B", "#FFFDF9", 166)}
-        ${renderIsoRoomLabel(1550, -30, 232, "LỚP MẪU GIÁO NHỠ (4–5T)", "#F4C96B", "#3D2A06", 224)}
-        ${renderIsoRoomLabel(1810, -30, 224, "SÂN CHƠI NHỎ PHẢI", "#389FAD", "#FFFDF9", 174)}
+        ${renderIsoRoomLabel(670, -30, 224, "SÂN CHƠI NHỎ TRÁI", "#52A877", "#FFFDF9", 214, "floor2-lon", "leaf")}
+        ${renderIsoRoomLabel(970, -30, 232, "LỚP MẪU GIÁO LỚN (5–6T)", "#D95D78", "#FFFDF9", 260, "floor2-lon", "book")}
+        ${renderIsoRoomLabel(1550, -30, 232, "LỚP MẪU GIÁO NHỠ (4–5T)", "#F4C96B", "#3D2A06", 260, "floor2-nho", "palette")}
+        ${renderIsoRoomLabel(1810, -30, 224, "SÂN CHƠI NHỎ PHẢI", "#389FAD", "#FFFDF9", 214, "floor2-nho", "leaf")}
       </g>
     </g>
   </svg>
   `;
-
-  // Gắn 2 cánh cổng rời vào lớp tiền cảnh màn hình để mở đều sang hai bên khung hình
-  const stageViewport = document.getElementById("stage-viewport");
-  if (stageViewport && !document.getElementById("gate-doors-portal")) {
-    const portal = document.createElement("div");
-    portal.id = "gate-doors-portal";
-    portal.className = "gate-doors-portal";
-    portal.setAttribute("aria-hidden", "true");
-    portal.innerHTML = `
-      <svg id="gate-leaf-left" class="gate-door-wing is-left" viewBox="0 0 220 420" preserveAspectRatio="none">
-        <rect x="8" y="10" width="204" height="400" rx="18" fill="#46B8DA" opacity="0.22"/>
-        <g fill="#42B2D4">
-          <rect x="18" y="10" width="14" height="400" rx="7"/>
-          <rect x="48" y="10" width="14" height="400" rx="7"/>
-          <rect x="78" y="10" width="14" height="400" rx="7"/>
-          <rect x="108" y="10" width="14" height="400" rx="7"/>
-          <rect x="138" y="10" width="14" height="400" rx="7"/>
-          <rect x="168" y="10" width="14" height="400" rx="7"/>
-          <rect x="196" y="10" width="14" height="400" rx="7"/>
-        </g>
-        <rect x="10" y="272" width="202" height="12" rx="6" fill="#E87A90"/>
-        <rect x="10" y="392" width="202" height="14" rx="7" fill="#E87A90"/>
-        <rect x="10" y="272" width="12" height="134" rx="6" fill="#E87A90"/>
-        <rect x="200" y="272" width="12" height="134" rx="6" fill="#E87A90"/>
-      </svg>
-
-      <svg id="gate-leaf-right" class="gate-door-wing is-right" viewBox="0 0 220 420" preserveAspectRatio="none">
-        <rect x="8" y="10" width="204" height="400" rx="18" fill="#46B8DA" opacity="0.22"/>
-        <g fill="#42B2D4">
-          <rect x="10" y="10" width="14" height="400" rx="7"/>
-          <rect x="40" y="10" width="14" height="400" rx="7"/>
-          <rect x="70" y="10" width="14" height="400" rx="7"/>
-          <rect x="100" y="10" width="14" height="400" rx="7"/>
-          <rect x="130" y="10" width="14" height="400" rx="7"/>
-          <rect x="160" y="10" width="14" height="400" rx="7"/>
-          <rect x="190" y="10" width="14" height="400" rx="7"/>
-        </g>
-        <rect x="8" y="272" width="202" height="12" rx="6" fill="#E87A90"/>
-        <rect x="8" y="392" width="202" height="14" rx="7" fill="#E87A90"/>
-        <rect x="8" y="272" width="12" height="134" rx="6" fill="#E87A90"/>
-        <rect x="198" y="272" width="12" height="134" rx="6" fill="#E87A90"/>
-      </svg>
-    `;
-    stageViewport.appendChild(portal);
-  }
 }

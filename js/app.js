@@ -1,6 +1,6 @@
 /**
  * ============================================================================
- * ỨNG DỤNG CHÍNH: RENDER DỮ LIỆU TỪ DATA.JS, ĐIỀU HƯỚNG & LIGHTBOX
+ * ỨNG DỤNG CHÍNH: RENDER THẺ TẠI CHỖ TRONG KHÔNG GIAN & ĐƯỜNG RAY ĐIỀU PHỐI
  * ============================================================================
  */
 
@@ -52,82 +52,73 @@ function createPhotoFallbackDataUri(title) {
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
 }
 
-/**
- * Hydrate logo ảnh, tên trường & số điện thoại chính trên thanh Chrome
- */
 function hydrateTopChrome() {
   const { schoolInfo, uiText } = SCHOOL_DATA;
   const logoImg = document.getElementById("brand-logo-img");
   if (logoImg && schoolInfo.logoSrc) logoImg.src = schoolInfo.logoSrc;
   document.getElementById("brand-name").textContent = schoolInfo.shortName;
   document.getElementById("brand-sub").textContent = uiText.brandTag;
-  document.getElementById("top-call-text").textContent = schoolInfo.phoneDisplay;
-  document.getElementById("top-call-cta").href = schoolInfo.phoneHref;
   document.getElementById("top-contact-link").textContent = uiText.skipToContact;
+
+  const callWrap = document.getElementById("call-menu-wrap");
+  const toggleBtn = document.getElementById("top-call-toggle");
+  const popover = document.getElementById("top-call-popover");
+  if (toggleBtn && popover && callWrap) {
+    const setOpen = (open) => {
+      popover.hidden = !open;
+      toggleBtn.setAttribute("aria-expanded", String(open));
+    };
+    toggleBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      setOpen(popover.hidden);
+    });
+    document.addEventListener("click", (e) => {
+      if (!popover.hidden && !callWrap.contains(e.target)) setOpen(false);
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && !popover.hidden) {
+        setOpen(false);
+        toggleBtn.focus();
+      }
+    });
+  }
 }
 
 /**
- * Render 7 chặng hành trình kiến trúc (Cổng -> Văn phòng/Bếp -> Sân chơi -> Nhà trẻ -> Mẫu giáo bé -> Cầu thang -> Lầu 2)
+ * Render các thẻ Chặng 1 -> Chặng 8 cố định tại chỗ giữa không gian (KHÔNG kéo lên xuống)
+ * và render đủ 11 điểm dừng trên đường ray #master-scroll-track
  */
-function renderStoryTrack() {
-  const track = document.getElementById("story-track");
-  const stageChapters = SCHOOL_DATA.chapters.filter(
-    (ch) => !["gallery", "teachers", "contact"].includes(ch.id)
-  );
+function renderInPlaceCardsAndTrack() {
+  const overlayHost = document.getElementById("story-cards-overlay");
+  const trackHost = document.getElementById("master-scroll-track");
 
-  track.innerHTML = stageChapters
-    .map((ch) => {
-      if (ch.id === "floor2" && Array.isArray(ch.subClasses)) {
-        const [nho, lon] = ch.subClasses;
-        return `
-        <article class="story-chapter" id="chapter-${ch.id}" data-chapter="${ch.id}">
-          <div class="story-card is-floor2-right" id="floor2-stop-nho">
-            <span class="chapter-eyebrow">${escapeHtml(ch.eyebrow)} • ${escapeHtml(nho.positionHint)}</span>
-            <h2 class="story-title">${escapeHtml(ch.title)}</h2>
-            <p class="story-body">${escapeHtml(ch.story)}</p>
-            <div class="subclasses-block">
-              <div class="subclass-mini-card">
-                <span class="subclass-hint">${escapeHtml(nho.positionHint)}</span>
-                <h3>${escapeHtml(nho.name)}</h3>
-                <p>${escapeHtml(nho.description)}</p>
-                ${renderBadgesHtml(nho.badges)}
-              </div>
-            </div>
-          </div>
+  const cardItems = [];
+  const stepSlots = [];
 
-          <div class="story-card is-floor2-left" id="floor2-stop-lon">
-            <span class="chapter-eyebrow">${escapeHtml(ch.eyebrow)} • ${escapeHtml(lon.positionHint)}</span>
-            <h2 class="story-title">${escapeHtml(lon.name)} — Sẵn sàng vào Lớp 1</h2>
-            <p class="story-body">${escapeHtml(ch.storySecondStop)}</p>
-            <div class="subclasses-block">
-              <div class="subclass-mini-card">
-                <span class="subclass-hint">${escapeHtml(lon.positionHint)}</span>
-                <h3>${escapeHtml(lon.name)}</h3>
-                <p>${escapeHtml(lon.description)}</p>
-                ${renderBadgesHtml(lon.badges)}
-              </div>
-            </div>
-          </div>
-        </article>`;
-      }
+  SCHOOL_DATA.chapters.forEach((ch) => {
+    if (["gallery", "teachers", "contact"].includes(ch.id)) {
+      stepSlots.push({ step: ch.id, chapter: ch.id });
+      return;
+    }
 
-      const alignClass = `align-${ch.cardSide || "left"}`;
-      const highlightsHtml = Array.isArray(ch.highlights)
-        ? `<ul class="story-highlights">${ch.highlights
-            .map((item) => `<li>${escapeHtml(item)}</li>`)
-            .join("")}</ul>`
+    const sideClass = ch.cardSide === "right" ? "is-side-right" : "is-side-left";
+    const highlightsHtml = Array.isArray(ch.highlights)
+      ? `<ul class="story-highlights">${ch.highlights
+          .map((item) => `<li>${escapeHtml(item)}</li>`)
+          .join("")}</ul>`
+      : "";
+    const scrollCueHtml =
+      ch.id === "gate"
+        ? `<div class="scroll-cue">
+             <span>${escapeHtml(SCHOOL_DATA.uiText.scrollHint)}</span>
+             <span class="scroll-cue-arrow" aria-hidden="true">↓</span>
+           </div>`
         : "";
-      const scrollCueHtml =
-        ch.id === "gate"
-          ? `<div class="scroll-cue">
-               <span>${escapeHtml(SCHOOL_DATA.uiText.scrollHint)}</span>
-               <span class="scroll-cue-arrow" aria-hidden="true">↓</span>
-             </div>`
-          : "";
 
-      return `
-      <article class="story-chapter ${alignClass}" id="chapter-${ch.id}" data-chapter="${ch.id}">
-        <div class="story-card">
+    cardItems.push({
+      cardId: `card-${ch.id}`,
+      html: `
+        <div class="story-card ${sideClass}" id="card-${ch.id}" data-card-step="${ch.id}">
           <span class="chapter-eyebrow">${escapeHtml(ch.eyebrow)}</span>
           ${
             ch.id === "gate"
@@ -138,19 +129,23 @@ function renderStoryTrack() {
           ${renderBadgesHtml(ch.badges)}
           ${highlightsHtml}
           ${scrollCueHtml}
-        </div>
-      </article>`;
-    })
+        </div>`,
+    });
+    stepSlots.push({ step: ch.id, chapter: ch.id });
+  });
+
+  overlayHost.innerHTML = cardItems.map((c) => c.html).join("");
+  trackHost.innerHTML = stepSlots
+    .map(
+      (s) =>
+        `<div class="scroll-step-slot" id="step-${s.step}" data-step="${s.step}" data-chapter="${s.chapter}"></div>`
+    )
     .join("");
 }
 
-/**
- * Render Cảnh 8 (Khoảnh khắc treo ngẫu nhiên), Cảnh 9 (Giáo viên từng lớp), Cảnh 10 (Liên hệ & Bản đồ)
- */
 function renderEpilogue() {
   const { gallery, teachersSection, contactSection, schoolInfo, uiText } = SCHOOL_DATA;
 
-  // Cảnh 8: Khoảnh khắc treo ngẫu nhiên, lệch tầng & nghiêng dễ thương
   document.getElementById("gallery-intro").innerHTML = `
     <span class="chapter-eyebrow">${escapeHtml(gallery.eyebrow)}</span>
     <h2>${escapeHtml(gallery.title)}</h2>
@@ -197,7 +192,6 @@ function renderEpilogue() {
 
   document.getElementById("gallery-note").textContent = uiText.galleryHint;
 
-  // Cảnh 9: Đội ngũ giáo viên theo đúng từng lớp
   document.getElementById("teachers-intro").innerHTML = `
     <span class="chapter-eyebrow">${escapeHtml(teachersSection.eyebrow)}</span>
     <h2>${escapeHtml(teachersSection.title)}</h2>
@@ -231,15 +225,15 @@ function renderEpilogue() {
         <div class="teacher-avatars-row ${isSingle ? "is-single" : ""}">
           ${avatarsHtml}
         </div>
-        <span class="teacher-class-pill">${escapeHtml(group.classLabel)}</span>
-        <h3>${escapeHtml(group.namesDisplay)}</h3>
-        <p class="teacher-quote">“${escapeHtml(group.quote)}”</p>
+        <div class="teacher-info-col">
+          <span class="teacher-class-pill">${escapeHtml(group.classLabel)}</span>
+          <p class="teacher-quote">“${escapeHtml(group.quote)}”</p>
+        </div>
       </article>
     `;
     })
     .join("");
 
-  // Cảnh 10: Bưu thiếp chiều nắng ấm tại Sơn Tịnh
   renderMiniSunsetGateSvg(document.getElementById("mini-gate-art"));
 
   const contactsHtml = schoolInfo.contacts
@@ -279,9 +273,8 @@ function renderEpilogue() {
 
       <div class="detail-tile">
         <span class="detail-label">${escapeHtml(contactSection.hoursTitle)}</span>
-        <div class="detail-value hours-inline">
-          <span><strong>Sáng:</strong> ${escapeHtml(schoolInfo.hours.morningTime)}</span>
-          <span><strong>Chiều:</strong> ${escapeHtml(schoolInfo.hours.afternoonTime)}</span>
+        <div class="detail-value">
+          <span>${escapeHtml(schoolInfo.hours.text)}</span>
         </div>
       </div>
     </div>
@@ -446,7 +439,7 @@ function bootstrap() {
     document.getElementById("garden-decor-back"),
     document.getElementById("garden-decor-front")
   );
-  renderStoryTrack();
+  renderInPlaceCardsAndTrack();
   renderEpilogue();
 
   const controller = initChoreography({
